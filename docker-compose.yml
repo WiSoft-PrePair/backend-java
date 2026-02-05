@@ -1,0 +1,36 @@
+services:
+  fluent-bit:
+    image: cr.fluentbit.io/fluent/fluent-bit:2.0
+    container_name: fluent-bit
+    restart: unless-stopped
+    ports:
+      - "24224:24224/tcp"
+    volumes:
+      - ./logging/fluent-bit-file.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./logging/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    networks:
+      - logging-network
+
+  prepair-api:
+    build: .
+    image: prepair-api:latest
+    container_name: prepair-api
+    restart: unless-stopped
+    ports:
+      - "7300:7300"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: 127.0.0.1:24224
+        fluentd-async: "true"
+        tag: prepair-api
+    depends_on:
+      - fluent-bit
+    networks:
+      - logging-network
+
+networks:
+  logging-network:
+    external: true
