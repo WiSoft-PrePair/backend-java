@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Build
+build/
+target/
+!build/libs/*.jar
+
+# Gradle
+.gradle
+gradle/
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+*.env
+
+# Docker
+docker-compose*.yml
+logging/
+
+# Test
+src/test/
