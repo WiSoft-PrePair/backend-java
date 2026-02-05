@@ -1,3 +1,11 @@
 spring:
   application:
     name: prepair-api
+
+server:
+  port: 7300
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: TRACE
