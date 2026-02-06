@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="prepair-api"/>
+
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        {
+                            "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z', UTC}",
+                            "level": "%level",
+                            "service": "${SERVICE_NAME}",
+                            "message": "%message",
+                            "module": "%logger{0}",
+                            "error": {
+                                "type": "%mdc{errorType}",
+                                "message": "%mdc{errorMessage}"
+                            }
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+</configuration>

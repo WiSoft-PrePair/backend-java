@@ -36,10 +36,14 @@ out/
 ### VS Code ###
 .vscode/
 
+### Docker ###
+.env
+postgres-data/
+
+
 ### 설정 파일 ###
 application.properties
 application.yml
-application-dev.yml
-application-local.yml
+application.yaml
 
 CLAUDE.md
