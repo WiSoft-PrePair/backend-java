@@ -11,6 +11,7 @@
                             "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z', UTC}",
                             "level": "%level",
                             "service": "${SERVICE_NAME}",
+                            "correlationId": "%mdc{correlationId}",
                             "message": "%message",
                             "module": "%logger{0}",
                             "error": {
