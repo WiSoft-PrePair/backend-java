@@ -44,8 +44,8 @@ public class InterviewQuestion extends BaseTimeEntity {
     @Column(nullable = false)
     private QuestionStatus status = QuestionStatus.UNANSWERED;
 
-    @Column(nullable = false)
-    private int score = 0;
+    @Column
+    private Integer latestScore;
 
     @Column(columnDefinition = "TEXT")
     private String sourceRef;

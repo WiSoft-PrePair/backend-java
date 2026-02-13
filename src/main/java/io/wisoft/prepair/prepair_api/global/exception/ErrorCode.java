@@ -18,8 +18,19 @@ public enum ErrorCode {
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "이미 존재하는 리소스입니다."),
 
     // Authorization
-    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다.");
+    FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
+    // User Service
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
+    USER_JOB_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저의 직무 정보가 없습니다."),
+    USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "User 서비스에서 오류가 발생했습니다."),
+    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "User 서비스에 연결할 수 없습니다."),
+
+    // OpenAI
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI API 호출 중 오류가 발생했습니다."),
+    OPENAI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답 파싱에 실패했습니다."),
+    OPENAI_INVALID_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답이 유효하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
-}
+    }

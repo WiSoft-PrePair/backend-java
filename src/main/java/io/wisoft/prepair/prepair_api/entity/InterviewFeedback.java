@@ -27,17 +27,22 @@ public class InterviewFeedback extends BaseTimeEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_answer_id", nullable = false)
+    @JoinColumn(name = "answer_id", nullable = false)
     private InterviewAnswer interviewAnswer;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String feedback;
 
+    @Column
+    private Integer score;
+
     public InterviewFeedback(
             final InterviewAnswer interviewAnswer,
-            final String feedback
+            final String feedback,
+            final Integer score
     ) {
         this.interviewAnswer = interviewAnswer;
         this.feedback = feedback;
+        this.score = score;
     }
 }
