@@ -30,7 +30,7 @@ public class InterviewAnswer extends BaseTimeEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_question_id", nullable = false)
+    @JoinColumn(name = "question_id", nullable = false)
     private InterviewQuestion interviewQuestion;
 
     @Column(nullable = false, columnDefinition = "TEXT")
