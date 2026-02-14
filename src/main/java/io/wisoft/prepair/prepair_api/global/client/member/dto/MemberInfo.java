@@ -1,10 +1,9 @@
-package io.wisoft.prepair.prepair_api.client.user.dto;
-
+package io.wisoft.prepair.prepair_api.global.client.member.dto;
 
 import java.util.List;
 import java.util.UUID;
 
-public record UserInfo(
+public record MemberInfo(
         UUID id,
         String email,
         String job,
@@ -13,6 +12,6 @@ public record UserInfo(
         String frequency,
         Integer point,
         Boolean isPro,
-        List<String> activity  // activity 필드 추가
+        List<String> activity
 ) {
 }

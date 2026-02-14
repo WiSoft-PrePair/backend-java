@@ -12,6 +12,6 @@ public record ApiResponse<T>(
     }
 
     public static <T> ApiResponse<T> created(T data, String message) {
-        return new ApiResponse(HttpStatus.CREATED.value(), data, message);
+        return new ApiResponse<>(HttpStatus.CREATED.value(), data, message);
     }
 }
