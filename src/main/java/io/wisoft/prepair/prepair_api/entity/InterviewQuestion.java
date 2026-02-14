@@ -28,7 +28,7 @@ public class InterviewQuestion extends BaseTimeEntity {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID userId;
+    private UUID memberId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
@@ -51,13 +51,13 @@ public class InterviewQuestion extends BaseTimeEntity {
     private String sourceRef;
 
     public InterviewQuestion(
-            final UUID userId,
+            final UUID memberId,
             final String question,
             final QuestionType questionType,
             final String questionTag,
             final String sourceRef
     ) {
-        this.userId = userId;
+        this.memberId = memberId;
         this.question = question;
         this.questionType = questionType;
         this.questionTag = questionTag;

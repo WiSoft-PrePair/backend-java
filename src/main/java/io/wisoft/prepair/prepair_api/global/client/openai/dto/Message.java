@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.client.openai.dto;
+package io.wisoft.prepair.prepair_api.global.client.openai.dto;
 
 public record Message(
         String role,

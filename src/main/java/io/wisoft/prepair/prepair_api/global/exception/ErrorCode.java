@@ -29,6 +29,12 @@ public enum ErrorCode {
     USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "User 서비스에서 오류가 발생했습니다."),
     USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "User 서비스에 연결할 수 없습니다."),
 
+    // Member Service
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다."),
+    MEMBER_JOB_NOT_FOUND(HttpStatus.BAD_REQUEST, "멤버의 직무 정보가 없습니다."),
+    MEMBER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Member 서비스에서 오류가 발생했습니다."),
+    MEMBER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Member 서비스에 연결할 수 없습니다."),
+
     // OpenAI
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI API 호출 중 오류가 발생했습니다."),
     OPENAI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답 파싱에 실패했습니다."),
@@ -36,4 +42,4 @@ public enum ErrorCode {
 
     private final HttpStatus httpStatus;
     private final String message;
-    }
+}

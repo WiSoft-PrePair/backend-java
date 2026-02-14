@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface InterviewQuestionRepository extends JpaRepository<InterviewQuestion, UUID> {
 
-    List<InterviewQuestion> findByUserId(UUID userId);
+    List<InterviewQuestion> findByMemberId(UUID memberId);
 }
