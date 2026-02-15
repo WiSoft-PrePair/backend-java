@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
         MDC.put("errorMessage", errorMessage);
     }
 
-    private static void clearMdcContext() {
+    private void clearMdcContext() {
         MDC.remove("module");
         MDC.remove("errorType");
         MDC.remove("errorMessage");

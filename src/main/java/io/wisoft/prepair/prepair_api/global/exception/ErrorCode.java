@@ -25,7 +25,18 @@ public enum ErrorCode {
 
     // LLM
     LLM_API_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "LLM API 호출에 실패했습니다.");
+  
+    // User Service
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
+    USER_JOB_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저의 직무 정보가 없습니다."),
+    USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "User 서비스에서 오류가 발생했습니다."),
+    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "User 서비스에 연결할 수 없습니다."),
+
+    // OpenAI
+    OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI API 호출 중 오류가 발생했습니다."),
+    OPENAI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답 파싱에 실패했습니다."),
+    OPENAI_INVALID_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답이 유효하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;
-}
+    }
