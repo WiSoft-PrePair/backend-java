@@ -21,7 +21,7 @@ RUN ./gradlew build -x test --no-daemon
 # ================================
 # Stage 2: Runtime
 # ================================
-FROM eclipse-temurin:21-jre
+FROM mcr.microsoft.com/playwright/java:v1.49.0-noble
 
 WORKDIR /app
 

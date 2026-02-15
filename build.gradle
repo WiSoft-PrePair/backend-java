@@ -30,7 +30,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
-	runtimeOnly 'org.postgresql:postgresql'
+	// 크롤링
+	implementation 'org.jsoup:jsoup:1.18.3'
+    implementation 'com.microsoft.playwright:playwright:1.49.0'
+
+    runtimeOnly 'org.postgresql:postgresql'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
