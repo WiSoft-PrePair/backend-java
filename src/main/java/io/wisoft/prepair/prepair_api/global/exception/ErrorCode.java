@@ -23,9 +23,6 @@ public enum ErrorCode {
     // Crawling
     CRAWLING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "채용공고 크롤링에 실패했습니다."),
 
-    // LLM
-    LLM_API_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "LLM API 호출에 실패했습니다.");
-  
     // User Service
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
     USER_JOB_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저의 직무 정보가 없습니다."),
