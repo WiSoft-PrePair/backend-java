@@ -14,6 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -58,6 +61,35 @@ public class OpenAiClient {
             throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
         } catch (Exception e) {
             log.error("OpenAI 호출 실패", e);
+            throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
+        }
+    }
+
+    public String chat(String systemPrompt, String userMessage) {
+        List<Map<String, String>> messages = List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userMessage)
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "model", model,
+                "messages", messages
+        );
+
+        try {
+            Map response = restClient.post()
+                    .uri(apiUrl)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .retrieve()
+                    .body(Map.class);
+
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+            return (String) message.get("content");
+        } catch (Exception e) {
+            log.error("OpenAI API 호출 실패", e);
             throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
         }
     }

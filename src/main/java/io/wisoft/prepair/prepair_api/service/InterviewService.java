@@ -32,7 +32,7 @@ public class InterviewService {
     @Transactional
     public void generateTodayQuestions() {
         List<MemberInfo> members = memberServiceClient.getMembers();
-        DayOfWeek today = LocalDate.now().getDayOfWeek();
+        DayOfWeek today = LocalDate.now(java.time.ZoneId.of("Asia/Seoul")).getDayOfWeek();
 
         List<MemberInfo> targetMembers = members.stream()
                 .filter(this::isValidFrequency)

@@ -4,7 +4,7 @@ import io.wisoft.prepair.prepair_api.crawler.CrawlerFactory;
 import io.wisoft.prepair.prepair_api.crawler.JobPostingCrawler;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.SourceType;
-import io.wisoft.prepair.prepair_api.global.client.OpenAiClient;
+import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.repository.JobPostingRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
