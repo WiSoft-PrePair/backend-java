@@ -8,7 +8,6 @@ import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.repository.JobPostingRepository;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.tool.schema.spi.SchemaTruncator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

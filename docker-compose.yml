@@ -42,6 +42,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MEMBER_SERVICE_API_KEY=${MEMBER_SERVICE_API_KEY}
+      - GMAIL_USERNAME=${GMAIL_USERNAME}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
     depends_on:
       - fluent-bit
       - postgres
