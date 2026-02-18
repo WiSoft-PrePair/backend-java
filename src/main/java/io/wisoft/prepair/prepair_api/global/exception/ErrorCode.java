@@ -23,11 +23,8 @@ public enum ErrorCode {
     // Crawling
     CRAWLING_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "채용공고 크롤링에 실패했습니다."),
 
-    // User Service
-    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."),
-    USER_JOB_NOT_FOUND(HttpStatus.BAD_REQUEST, "유저의 직무 정보가 없습니다."),
-    USER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "User 서비스에서 오류가 발생했습니다."),
-    USER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "User 서비스에 연결할 수 없습니다."),
+    // Email Service
+    EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이메일 발송에 실패했습니다."),
 
     // Member Service
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다."),
