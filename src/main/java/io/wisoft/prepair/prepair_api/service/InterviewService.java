@@ -13,7 +13,6 @@ import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -39,6 +38,7 @@ public class InterviewService {
         List<MemberInfo> targetMembers = members.stream()
                 .filter(this::isValidFrequency)
                 .filter(this::isValidJob)
+                .filter(this::isValidNotification)
                 .filter(member -> shouldSendToday(member, today))
                 .toList();
 
@@ -114,6 +114,14 @@ public class InterviewService {
             case EVERY -> true;
             case WEEKLY -> today == DayOfWeek.MONDAY;
         };
+    }
+
+    private boolean isValidNotification(MemberInfo member) {
+        if (member.notification() == null) {
+            log.warn("유효하지 않은 멤버 스킵 - memberId: {}, reason: no_notification", member.id());
+            return false;
+        }
+        return true;
     }
 
     private boolean isValidFrequency(MemberInfo member) {
