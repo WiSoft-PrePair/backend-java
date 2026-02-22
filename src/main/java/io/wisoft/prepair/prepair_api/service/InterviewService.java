@@ -1,6 +1,5 @@
 package io.wisoft.prepair.prepair_api.service;
 
-import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.Notification;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
@@ -10,6 +9,8 @@ import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberInfo;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.global.email.EmailService;
+import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
+import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -147,5 +148,11 @@ public class InterviewService {
     @Transactional(readOnly = true)
     public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
         return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type);
+    }
+
+    @Transactional(readOnly = true)
+    public InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
+        return questionRepository.findByIdAndMemberId(questionId, memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
     }
 }

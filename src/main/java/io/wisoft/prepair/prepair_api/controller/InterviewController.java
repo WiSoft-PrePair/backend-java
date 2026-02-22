@@ -1,7 +1,6 @@
 package io.wisoft.prepair.prepair_api.controller;
 
 import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
-import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.InterviewService;
@@ -31,6 +30,15 @@ public class InterviewController {
                 .toList();
 
         return ApiResponse.ok(data, "질문 목록을 조회했습니다.");
+    }
+
+    @GetMapping("/me/questions/{questionId}")
+    public ApiResponse<QuestionResponse> getQuestion(
+            @PathVariable UUID questionId,
+            @RequestHeader("X-User-Id") UUID memberId
+    ) {
+        QuestionResponse data = QuestionResponse.from(interviewService.getQuestion(questionId, memberId));
+        return ApiResponse.ok(data, "특정 질문을 조회했습니다.");
     }
 }
 
