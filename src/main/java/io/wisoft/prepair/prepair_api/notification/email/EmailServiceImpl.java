@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.global.email;
+package io.wisoft.prepair.prepair_api.notification.email;
 
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;

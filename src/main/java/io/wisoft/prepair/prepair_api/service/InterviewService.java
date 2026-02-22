@@ -8,7 +8,7 @@ import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberInfo;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
-import io.wisoft.prepair.prepair_api.global.email.EmailService;
+import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
