@@ -1,7 +1,9 @@
 package io.wisoft.prepair.prepair_api.service;
 
+import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.Notification;
+import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
@@ -13,11 +15,13 @@ import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -138,5 +142,10 @@ public class InterviewService {
             return false;
         }
         return true;
+    }
+
+    @Transactional(readOnly = true)
+    public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
+        return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type);
     }
 }
