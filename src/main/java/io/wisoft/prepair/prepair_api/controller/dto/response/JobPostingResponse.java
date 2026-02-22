@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.controller.dto;
+package io.wisoft.prepair.prepair_api.controller.dto.response;
 
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import java.time.LocalDateTime;

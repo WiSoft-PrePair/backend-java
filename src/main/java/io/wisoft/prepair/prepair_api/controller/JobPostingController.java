@@ -1,7 +1,7 @@
 package io.wisoft.prepair.prepair_api.controller;
 
-import io.wisoft.prepair.prepair_api.controller.dto.JobPostingRequest;
-import io.wisoft.prepair.prepair_api.controller.dto.JobPostingResponse;
+import io.wisoft.prepair.prepair_api.controller.dto.request.JobPostingRequest;
+import io.wisoft.prepair.prepair_api.controller.dto.response.JobPostingResponse;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.JobPostingService;
