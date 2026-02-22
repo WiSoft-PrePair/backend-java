@@ -19,7 +19,7 @@ public class InterviewController {
 
     private final InterviewService interviewService;
 
-    @GetMapping("me/questions")
+    @GetMapping("/me/questions")
     public ApiResponse<List<QuestionResponse>> getQuestions(
             @RequestHeader("X-User-Id") UUID memberId,
             @RequestParam QuestionType type
