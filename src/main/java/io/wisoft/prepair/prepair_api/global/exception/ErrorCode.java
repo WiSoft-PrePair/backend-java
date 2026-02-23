@@ -33,6 +33,7 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다."),
     MEMBER_SERVICE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Member 서비스에서 오류가 발생했습니다."),
     MEMBER_SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Member 서비스에 연결할 수 없습니다."),
+    KAKAO_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "카카오 재로그인이 필요합니다."),
 
     // OpenAI
     OPENAI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI API 호출 중 오류가 발생했습니다."),

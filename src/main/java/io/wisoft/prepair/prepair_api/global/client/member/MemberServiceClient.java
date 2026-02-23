@@ -1,7 +1,7 @@
 package io.wisoft.prepair.prepair_api.global.client.member;
 
+import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MembersData;
-import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberInfo;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberServiceResponse;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
@@ -29,7 +29,7 @@ public class MemberServiceClient {
     @Value("${external.member-service.api-key}")
     private String apiKey;
 
-    public List<MemberInfo> getMembers() {
+    public List<MemberSchedulerInfo> getMembers() {
         try {
             String url = memberServiceUrl + "/api/members/all";
 
@@ -37,7 +37,8 @@ public class MemberServiceClient {
                     .uri(url)
                     .header("x-api-prepair", apiKey)
                     .retrieve()
-                    .body(new ParameterizedTypeReference<>() {});
+                    .body(new ParameterizedTypeReference<>() {
+                    });
 
             if (response == null || response.data() == null || response.data().members() == null) {
                 log.error("Member 서비스 응답 없음");
@@ -46,8 +47,6 @@ public class MemberServiceClient {
 
             return response.data().members();
 
-        } catch (BusinessException e) {
-            throw e;
         } catch (HttpServerErrorException e) {
             log.error("Member 서비스 오류", e);
             throw new BusinessException(ErrorCode.MEMBER_SERVICE_ERROR);
