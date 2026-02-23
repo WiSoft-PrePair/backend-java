@@ -3,20 +3,22 @@ package io.wisoft.prepair.prepair_api.service;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.Notification;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
+import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
-import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberInfo;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+import io.wisoft.prepair.prepair_api.notification.kakao.KakaoService;
 import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -35,12 +37,24 @@ public class InterviewService {
     private final OpenAiClient openAiClient;
     private final InterviewPromptBuilder promptBuilder;
     private final EmailService emailService;
+    private final KakaoService kakaoService;
+
+    @Transactional(readOnly = true)
+    public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
+        return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type);
+    }
+
+    @Transactional(readOnly = true)
+    public InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
+        return questionRepository.findByIdAndMemberId(questionId, memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+    }
 
     public void generateTodayQuestions() {
-        List<MemberInfo> members = memberServiceClient.getMembers();
+        List<MemberSchedulerInfo> members = memberServiceClient.getMembers();
         DayOfWeek today = LocalDate.now(ZoneId.of("Asia/Seoul")).getDayOfWeek();
 
-        List<MemberInfo> targetMembers = members.stream()
+        List<MemberSchedulerInfo> targetMembers = members.stream()
                 .filter(this::isValidFrequency)
                 .filter(this::isValidJob)
                 .filter(this::isValidNotification)
@@ -51,7 +65,7 @@ public class InterviewService {
         targetMembers.forEach(this::processTodayQuestion);
     }
 
-    private void processTodayQuestion(MemberInfo member) {
+    private void processTodayQuestion(MemberSchedulerInfo member) {
         try {
             List<InterviewQuestion> previousQuestions = questionRepository.findByMemberId(member.id());
             String prompt = promptBuilder.buildQuestionPrompt(member.job(), previousQuestions);
@@ -70,18 +84,18 @@ public class InterviewService {
     /**
      * [기업 맞춤 면접 질문 로직] - 구현 예정
      */
-    public void generateCompanyQuestions(MemberInfo member, JobPosting jobPosting) {
+    public void generateCompanyQuestions(MemberSchedulerInfo member, JobPosting jobPosting) {
 
     }
 
     /**
      * [기업 맞춤 면접 질문 로직] - 구현 예정
      */
-    private void processCompanyQuestion(MemberInfo memberInfo, JobPosting jobPosting) {
+    private void processCompanyQuestion(MemberSchedulerInfo memberInfo, JobPosting jobPosting) {
 
     }
 
-    private void notifyMember(MemberInfo member, InterviewQuestion question) {
+    private void notifyMember(MemberSchedulerInfo member, InterviewQuestion question) {
         Notification notification = member.notification();
 
         if (notification == Notification.EMAIL || notification == Notification.BOTH) {
@@ -93,7 +107,7 @@ public class InterviewService {
         }
     }
 
-    private void sendEmail(MemberInfo member, InterviewQuestion question) {
+    private void sendEmail(MemberSchedulerInfo member, InterviewQuestion question) {
         try {
             emailService.sendInterviewQuestion(
                     member.email(),
@@ -107,21 +121,38 @@ public class InterviewService {
         }
     }
 
-    /**
-     * [카카오 알림] - 구현 예정
-     */
-    private void sendKakao(MemberInfo member, InterviewQuestion question) {
-
+    private void sendKakao(MemberSchedulerInfo member, InterviewQuestion question) {
+        if (!isValidKakaoToken(member)) return;
+        try {
+            kakaoService.sendInterviewQuestion(
+                    member.kakaoAccessToken(),
+                    question.getQuestion(),
+                    question.getQuestionTag()
+            );
+            log.info("카카오톡 발송 성공 - memberId: {}", member.id());
+        } catch (HttpClientErrorException.Unauthorized e) {
+            log.error("카카오 AT 만료 - memberId: {}", member.id());
+        } catch (Exception e) {
+            log.error("카카오톡 발송 실패 - memberId: {}", member.id(), e);
+        }
     }
 
-    private boolean shouldSendToday(MemberInfo member, DayOfWeek today) {
+    private boolean shouldSendToday(MemberSchedulerInfo member, DayOfWeek today) {
         return switch (member.frequency()) {
             case EVERY -> true;
             case WEEKLY -> today == DayOfWeek.MONDAY;
         };
     }
 
-    private boolean isValidNotification(MemberInfo member) {
+    private boolean isValidKakaoToken(MemberSchedulerInfo member) {
+        if (member.kakaoAccessToken() == null || member.kakaoAccessToken().isBlank()) {
+            log.warn("유효하지 않은 멤버 스킵 - memberId: {}, reason: no_kakao_token", member.id());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isValidNotification(MemberSchedulerInfo member) {
         if (member.notification() == null) {
             log.warn("유효하지 않은 멤버 스킵 - memberId: {}, reason: no_notification", member.id());
             return false;
@@ -129,7 +160,7 @@ public class InterviewService {
         return true;
     }
 
-    private boolean isValidFrequency(MemberInfo member) {
+    private boolean isValidFrequency(MemberSchedulerInfo member) {
         if (member.frequency() == null) {
             log.warn("유효하지 않은 멤버 스킵 - memberId: {}, reason: no_frequency", member.id());
             return false;
@@ -137,22 +168,11 @@ public class InterviewService {
         return true;
     }
 
-    private boolean isValidJob(MemberInfo member) {
+    private boolean isValidJob(MemberSchedulerInfo member) {
         if (member.job() == null || member.job().isBlank()) {
             log.warn("유효하지 않은 멤버 스킵 - memberId: {}, reason: no_job", member.id());
             return false;
         }
         return true;
-    }
-
-    @Transactional(readOnly = true)
-    public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
-        return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type);
-    }
-
-    @Transactional(readOnly = true)
-    public InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
-        return questionRepository.findByIdAndMemberId(questionId, memberId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
     }
 }
