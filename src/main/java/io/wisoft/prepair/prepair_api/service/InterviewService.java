@@ -81,9 +81,6 @@ public class InterviewService {
         }
     }
 
-    /**
-     * [기업 맞춤 면접 질문 로직] - 현재 getSourceUrl() 저장 중, id 저장 논의 필요
-     */
     public List<InterviewQuestion> generateCompanyQuestions(UUID memberId, JobPosting jobPosting) {
         try {
             final String prompt = promptBuilder.buildCompanyQuestionPrompt(jobPosting.getContent());
