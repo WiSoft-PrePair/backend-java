@@ -1,21 +1,20 @@
 package io.wisoft.prepair.prepair_api.global.client.openai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiRequest;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiResponse;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -34,11 +33,49 @@ public class OpenAiClient {
     @Value("${external.openai.model}")
     private String model;
 
+    /**
+     * 단일 질문 생성
+     */
     public QuestionWithTags generateQuestion(String prompt) {
-        try {
-            OpenAiRequest request = OpenAiRequest.of(model, prompt);
 
-            OpenAiResponse response = restClient.post()
+        final String content = call(OpenAiRequest.of(model, prompt));
+
+        try {
+            return objectMapper.readValue(content, QuestionWithTags.class);
+        } catch (JsonProcessingException e) {
+            log.error("OpenAI 응답 파싱 실패", e);
+            throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
+        }
+    }
+
+    /**
+     * 다중 질문 생성
+     */
+    public List<QuestionWithTags> generateQuestions(String prompt) {
+
+        final String content = call(OpenAiRequest.of(model, prompt));
+
+        try {
+            return objectMapper.readValue(
+                    content,
+                    new TypeReference<List<QuestionWithTags>>() {}
+            );
+        } catch (JsonProcessingException e) {
+            log.error("OpenAI 응답 파싱 실패");
+            throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
+        }
+    }
+
+    /**
+     *  JSON 구조화 요청
+     */
+    public String generateText(String prompt) {
+        return call(OpenAiRequest.of(model, prompt));
+    }
+
+    private String call(OpenAiRequest request) {
+        try {
+            final OpenAiResponse response = restClient.post()
                     .uri(apiUrl)
                     .header("Authorization", "Bearer " + apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
@@ -50,46 +87,9 @@ public class OpenAiClient {
                 log.error("OpenAI 응답 없음");
                 throw new BusinessException(ErrorCode.OPENAI_INVALID_RESPONSE);
             }
-
-            String content = response.getContent();
-            return objectMapper.readValue(content, QuestionWithTags.class);
-
-        } catch (BusinessException e) {
-            throw e;
-        } catch (JsonProcessingException e) {
-            log.error("OpenAI 응답 파싱 실패", e);
-            throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
+            return response.getContent();
         } catch (Exception e) {
             log.error("OpenAI 호출 실패", e);
-            throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
-        }
-    }
-
-    public String chat(String systemPrompt, String userMessage) {
-        List<Map<String, String>> messages = List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userMessage)
-        );
-
-        Map<String, Object> requestBody = Map.of(
-                "model", model,
-                "messages", messages
-        );
-
-        try {
-            Map response = restClient.post()
-                    .uri(apiUrl)
-                    .header("Authorization", "Bearer " + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(requestBody)
-                    .retrieve()
-                    .body(Map.class);
-
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
-            Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-            return (String) message.get("content");
-        } catch (Exception e) {
-            log.error("OpenAI API 호출 실패", e);
             throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
         }
     }

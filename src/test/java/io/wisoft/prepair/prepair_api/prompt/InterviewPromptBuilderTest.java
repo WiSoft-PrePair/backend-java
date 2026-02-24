@@ -29,7 +29,7 @@ class InterviewPromptBuilderTest {
         List<InterviewQuestion> previousQuestions = List.of();
 
         // When
-        String prompt = promptBuilder.buildQuestionPrompt(job, previousQuestions);
+        String prompt = promptBuilder.buildDailyQuestionPrompt(job, previousQuestions);
 
         // Then
         assertThat(prompt).contains("백엔드 개발자");
@@ -52,7 +52,7 @@ class InterviewPromptBuilderTest {
         List<InterviewQuestion> previousQuestions = List.of(prev);
 
         // When
-        String prompt = promptBuilder.buildQuestionPrompt(job, previousQuestions);
+        String prompt = promptBuilder.buildDailyQuestionPrompt(job, previousQuestions);
 
         // Then
         assertThat(prompt).contains("이전에 받은 질문들");
