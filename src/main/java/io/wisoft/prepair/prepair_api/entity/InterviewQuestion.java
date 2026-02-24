@@ -7,9 +7,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -47,20 +50,21 @@ public class InterviewQuestion extends BaseTimeEntity {
     @Column
     private Integer latestScore;
 
-    @Column(columnDefinition = "TEXT")
-    private String sourceRef;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_posting_id")
+    private JobPosting jobPosting;
 
     public InterviewQuestion(
             final UUID memberId,
             final String question,
             final QuestionType questionType,
             final String questionTag,
-            final String sourceRef
+            final JobPosting jobPosting
     ) {
         this.memberId = memberId;
         this.question = question;
         this.questionType = questionType;
         this.questionTag = questionTag;
-        this.sourceRef = sourceRef;
+        this.jobPosting = jobPosting;
     }
 }

@@ -90,8 +90,7 @@ public class InterviewService {
             final List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
             final List<InterviewQuestion> questions = results.stream()
                     .map(result ->
-                            interviewQuestionService.saveCompanyQuestion(memberId, result,
-                                    jobPosting.getSourceUrl()))
+                            interviewQuestionService.saveCompanyQuestion(memberId, result, jobPosting))
                     .toList();
             log.info("기업 맞춤 질문 생성 완료 - memberId: {}, jobPostingId: {}", memberId, jobPosting.getId());
 

@@ -73,6 +73,8 @@ public class OpenAiClient {
         return call(OpenAiRequest.of(model, prompt));
     }
 
+
+
     private String call(OpenAiRequest request) {
         try {
             final OpenAiResponse response = restClient.post()

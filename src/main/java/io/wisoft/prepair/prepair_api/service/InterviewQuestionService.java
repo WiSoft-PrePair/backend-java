@@ -1,6 +1,7 @@
 package io.wisoft.prepair.prepair_api.service;
 
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
+import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
@@ -22,17 +23,17 @@ public class InterviewQuestionService {
         return save(memberId, QuestionType.TEXT, null, result);
     }
 
-    public InterviewQuestion saveCompanyQuestion(UUID memberId, QuestionWithTags result, String sourceRef) {
-        return save(memberId, QuestionType.COMPANY, sourceRef, result);
+    public InterviewQuestion saveCompanyQuestion(UUID memberId, QuestionWithTags result, JobPosting jobPosting) {
+        return save(memberId, QuestionType.COMPANY, jobPosting, result);
     }
 
-    public InterviewQuestion save(UUID memberId, QuestionType questionType, String sourceRef, QuestionWithTags result) {
+    public InterviewQuestion save(UUID memberId, QuestionType questionType, JobPosting jobPosting, QuestionWithTags result) {
         InterviewQuestion question = new InterviewQuestion(
                 memberId,
                 result.question(),
                 questionType,
                 result.joinTags(),
-                sourceRef
+                jobPosting
         );
         return questionRepository.save(question);
     }

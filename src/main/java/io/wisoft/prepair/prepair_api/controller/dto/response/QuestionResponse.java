@@ -14,7 +14,7 @@ public record QuestionResponse(
         QuestionType questionType,
         QuestionStatus status,
         Integer latestScore,
-        String sourceRef,
+        UUID jobPostingId,
         LocalDateTime createdAt
 ) {
 
@@ -26,7 +26,7 @@ public record QuestionResponse(
                 question.getQuestionType(),
                 question.getStatus(),
                 question.getLatestScore(),
-                question.getSourceRef(),
+                question.getJobPosting() != null ? question.getJobPosting().getId() : null,
                 question.getCreatedAt()
         );
     }
