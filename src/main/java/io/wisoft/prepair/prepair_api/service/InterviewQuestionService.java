@@ -4,12 +4,11 @@ import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -23,7 +22,7 @@ public class InterviewQuestionService {
         return save(memberId, QuestionType.TEXT, null, result);
     }
 
-    public InterviewQuestion saveCompanyQuestion(UUID memberId,QuestionWithTags result, String sourceRef) {
+    public InterviewQuestion saveCompanyQuestion(UUID memberId, QuestionWithTags result, String sourceRef) {
         return save(memberId, QuestionType.COMPANY, sourceRef, result);
     }
 

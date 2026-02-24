@@ -68,7 +68,7 @@ public class InterviewService {
     private void processTodayQuestion(MemberSchedulerInfo member) {
         try {
             List<InterviewQuestion> previousQuestions = questionRepository.findByMemberId(member.id());
-            String prompt = promptBuilder.buildQuestionPrompt(member.job(), previousQuestions);
+            String prompt = promptBuilder.buildDailyQuestionPrompt(member.job(), previousQuestions);
             QuestionWithTags result = openAiClient.generateQuestion(prompt);
             log.info("질문 생성 성공 - memberId: {}", member.id());
 
@@ -82,17 +82,24 @@ public class InterviewService {
     }
 
     /**
-     * [기업 맞춤 면접 질문 로직] - 구현 예정
+     * [기업 맞춤 면접 질문 로직] - 현재 getSourceUrl() 저장 중, id 저장 논의 필요
      */
-    public void generateCompanyQuestions(MemberSchedulerInfo member, JobPosting jobPosting) {
+    public List<InterviewQuestion> generateCompanyQuestions(UUID memberId, JobPosting jobPosting) {
+        try {
+            final String prompt = promptBuilder.buildCompanyQuestionPrompt(jobPosting.getContent());
+            final List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
+            final List<InterviewQuestion> questions = results.stream()
+                    .map(result ->
+                            interviewQuestionService.saveCompanyQuestion(memberId, result,
+                                    jobPosting.getSourceUrl()))
+                    .toList();
+            log.info("기업 맞춤 질문 생성 완료 - memberId: {}, jobPostingId: {}", memberId, jobPosting.getId());
 
-    }
-
-    /**
-     * [기업 맞춤 면접 질문 로직] - 구현 예정
-     */
-    private void processCompanyQuestion(MemberSchedulerInfo memberInfo, JobPosting jobPosting) {
-
+            return questions;
+        } catch (Exception e) {
+            log.error("기업 맞춤 질문 생성 실패 - memberId: {}, jobPostingId: {}", memberId, jobPosting.getId(), e);
+            throw e;
+        }
     }
 
     private void notifyMember(MemberSchedulerInfo member, InterviewQuestion question) {

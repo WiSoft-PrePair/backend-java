@@ -8,7 +8,7 @@ import java.util.List;
 @Component
 public class InterviewPromptBuilder {
 
-    public String buildQuestionPrompt(String job, List<InterviewQuestion> previousQuestions) {
+    public String buildDailyQuestionPrompt(String job, List<InterviewQuestion> previousQuestions) {
         StringBuilder prompt = new StringBuilder();
 
         prompt.append("당신은 ").append(job).append(" 면접관입니다.\n");
@@ -31,6 +31,44 @@ public class InterviewPromptBuilder {
         prompt.append("}");
 
         return prompt.toString();
+    }
+
+    public String buildCompanyQuestionPrompt(String jobPostingContent) {
+            return """  
+                    너는 채용공고 내용을 분석하여 실제 그 기업의 면접을 진행하는 면접관이야.
+                    
+                    아래 채용공고 정보를 바탕으로 지원자에게 물어볼 면접 질문 5개를 만들고, 관련 키워드 태그 2-3개를 추출해줘.
+                    
+                    규칙:
+                    1. 채용공고의 기술 스택, 자격 요건, 담당 업무를 반드시 반영해줘.
+                    2. 반드시 아래 JSON 형식으로만 응답하고, 다른 텍스트는 포함하지 마.
+                    3. JSON 외의 마크다운(```json 등)도 포함하지 마.
+                    [
+                      {
+                        "question": "질문 내용",
+                        "tags": ["태그1", "태그2", "태그3"]
+                      },
+                      {
+                        "question": "질문 내용",
+                        "tags": ["태그1", "태그2", "태그3"]
+                      },
+                      {
+                        "question": "질문 내용",
+                        "tags": ["태그1", "태그2", "태그3"]
+                      },
+                      {
+                        "question": "질문 내용",
+                        "tags": ["태그1", "태그2", "태그3"]
+                      },
+                      {
+                        "question": "질문 내용",
+                        "tags": ["태그1", "태그2", "태그3"]
+                      }
+                    ]
+        
+                    채용공고 정보:
+                    %s
+                    """.formatted(jobPostingContent);
     }
 
     /**
