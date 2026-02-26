@@ -2,8 +2,8 @@ package io.wisoft.prepair.prepair_api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wisoft.prepair.prepair_api.controller.dto.FeedbackResult;
-import io.wisoft.prepair.prepair_api.controller.dto.FeedbackDetail;
+import io.wisoft.prepair.prepair_api.service.dto.FeedbackResult;
+import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.entity.InterviewFeedback;
