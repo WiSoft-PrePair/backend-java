@@ -1,6 +1,5 @@
 package io.wisoft.prepair.prepair_api.controller.dto.response;
 
-import io.wisoft.prepair.prepair_api.controller.dto.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.entity.InterviewFeedback;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,7 +9,7 @@ public record FeedbackResponse(
         String answer,
         FeedbackDetail feedback,
         Integer score,
-        LocalDateTime createAt
+        LocalDateTime createdAt
 ) {
 
     public static FeedbackResponse from(InterviewFeedback f, FeedbackDetail detail) {
