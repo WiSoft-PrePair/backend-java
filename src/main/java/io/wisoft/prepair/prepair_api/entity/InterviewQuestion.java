@@ -67,4 +67,12 @@ public class InterviewQuestion extends BaseTimeEntity {
         this.questionTag = questionTag;
         this.jobPosting = jobPosting;
     }
+
+    public void updateStatus(final QuestionStatus status) {
+        this.status = status;
+    }
+
+    public void updateLatestScore(final Integer score) {
+        this.latestScore = score;
+    }
 }
