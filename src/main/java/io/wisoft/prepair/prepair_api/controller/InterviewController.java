@@ -1,15 +1,26 @@
 package io.wisoft.prepair.prepair_api.controller;
 
+import io.wisoft.prepair.prepair_api.controller.dto.request.AnswerRequest;
+import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.InterviewService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -39,6 +50,18 @@ public class InterviewController {
     ) {
         QuestionResponse data = QuestionResponse.from(interviewService.getQuestion(questionId, memberId));
         return ApiResponse.ok(data, "특정 질문을 조회했습니다.");
+    }
+
+
+    @PostMapping("/{interviewId}/answers")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<FeedbackResponse> submitAnswer(
+            @PathVariable UUID interviewId,
+            @RequestHeader("X-User-Id") UUID memberId,
+            @RequestBody @Valid AnswerRequest request
+    ) {
+        FeedbackResponse data = interviewService.submitAnswer(interviewId, memberId, request.answer(), request.answerType(), request.mediaUrl());
+        return ApiResponse.created(data, "답변이 제출되었습니다.");
     }
 }
 

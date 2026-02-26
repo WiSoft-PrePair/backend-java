@@ -1,30 +1,31 @@
 package io.wisoft.prepair.prepair_api.service;
 
+import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
+import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
+import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
 import io.wisoft.prepair.prepair_api.entity.enums.Notification;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
+import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
-import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
-import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.notification.kakao.KakaoService;
 import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpClientErrorException;
-
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Service
@@ -33,6 +34,7 @@ public class InterviewService {
 
     private final InterviewQuestionRepository questionRepository;
     private final InterviewQuestionService interviewQuestionService;
+    private final InterviewAnswerService interviewAnswerService;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
     private final InterviewPromptBuilder promptBuilder;
@@ -96,6 +98,10 @@ public class InterviewService {
             log.error("기업 맞춤 질문 생성 실패 - memberId: {}, jobPostingId: {}", memberId, jobPosting.getId(), e);
             throw e;
         }
+    }
+
+    public FeedbackResponse submitAnswer(UUID questionId, UUID memberId, String answer, AnswerType answerType, String mediaUrl) {
+        return interviewAnswerService.submitAnswer(questionId, memberId, answer, answerType, mediaUrl);
     }
 
     private void notifyMember(MemberSchedulerInfo member, InterviewQuestion question) {
