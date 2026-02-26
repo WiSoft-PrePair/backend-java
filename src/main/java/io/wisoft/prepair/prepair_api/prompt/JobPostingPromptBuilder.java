@@ -17,14 +17,14 @@ public class JobPostingPromptBuilder {
                 5. JSON 외의 마크다운(```json 등)도 포함하지 마.
                 
                 {
-                  "company_name": "회사명",
-                  "job_title": "채용 포지션명",
+                  "companyName": "회사명",
+                  "jobTitle": "채용 포지션명",
                   "responsibilities": "주요 업무 및 담당 역할",
                   "requirements": "자격 요건 (필수 조건)",
-                  "preferred_qualifications": "우대 사항",
-                  "tech_stack": "기술 스택 (쉼표로 구분)",
-                  "experience_level": "경력 수준 (예: 신입, 3년 이상, 시니어)",
-                  "employment_type": "고용 형태 (예: 정규직, 계약직, 인턴)",
+                  "preferredQualifications": "우대 사항",
+                  "techStack": "기술 스택 (쉼표로 구분)",
+                  "experienceLevel": "경력 수준 (예: 신입, 3년 이상, 시니어)",
+                  "employmentType": "고용 형태 (예: 정규직, 계약직, 인턴)",
                   "deadline": "채용 마감일"
                 }
                   채용공고 원문:
