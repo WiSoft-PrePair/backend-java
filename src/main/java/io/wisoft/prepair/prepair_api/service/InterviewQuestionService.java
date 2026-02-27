@@ -5,7 +5,9 @@ import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
