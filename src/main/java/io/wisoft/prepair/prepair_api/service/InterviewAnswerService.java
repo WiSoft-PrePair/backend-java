@@ -2,7 +2,6 @@ package io.wisoft.prepair.prepair_api.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wisoft.prepair.prepair_api.service.dto.FeedbackResult;
 import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewAnswer;
@@ -18,16 +17,18 @@ import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.InterviewAnswerRepository;
 import io.wisoft.prepair.prepair_api.repository.InterviewFeedbackRepository;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+import io.wisoft.prepair.prepair_api.service.dto.FeedbackResult;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class InterviewAnswerService {
 
     private final InterviewQuestionRepository questionRepository;
@@ -38,14 +39,30 @@ public class InterviewAnswerService {
     private final ObjectMapper objectMapper;
     private final MemberServiceClient memberServiceClient;
 
+    @Lazy
+    @Autowired
+    private InterviewAnswerService self;
+
     public FeedbackResponse submitAnswer(final UUID questionId, final UUID memberId, final String answer, final AnswerType answerType, final String mediaUrl) {
         InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-        InterviewAnswer interviewAnswer = saveAnswer(question, answer, answerType, mediaUrl);
-
         FeedbackResult result = generateFeedback(question, answer, answerType, mediaUrl);
         FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
+
+        InterviewFeedback feedback = self.persistAnswerAndFeedback(questionId, memberId, answer, answerType, mediaUrl, result, detail);
+
+        log.info("답변 제출 및 피드백 생성 완료 - questionId: {}, score: {}", questionId, result.score());
+        return FeedbackResponse.from(feedback, detail);
+    }
+
+    @Transactional
+    public InterviewFeedback persistAnswerAndFeedback(final UUID questionId, final UUID memberId, final String answer, final AnswerType answerType, final String mediaUrl, final FeedbackResult result, final FeedbackDetail detail
+    ) {
+        InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        InterviewAnswer interviewAnswer = saveAnswer(question, answer, answerType, mediaUrl);
 
         InterviewFeedback feedback = feedbackRepository.save(
                 new InterviewFeedback(interviewAnswer, serializeFeedback(detail), result.score())
@@ -57,10 +74,9 @@ public class InterviewAnswerService {
         if (isFirstFeedback) {
             memberServiceClient.sendScore(memberId, result.score());
         }
-
-        log.info("답변 제출 및 피드백 생성 완료 - questionId: {}, score: {}", questionId, result.score());
-        return FeedbackResponse.from(feedback, detail);
+        return feedback;
     }
+
 
     private InterviewAnswer saveAnswer(final InterviewQuestion question, final String answer, final AnswerType answerType, final String mediaUrl) {
         question.updateStatus(QuestionStatus.ANSWERED);
