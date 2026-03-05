@@ -64,7 +64,7 @@ public class MemberServiceClient {
 
     public void sendScore(final UUID memberId, final Integer score) {
         try {
-            String url = memberServiceUrl + "/api/members/score";
+            String url = memberServiceUrl + "/api/members/reward";
 
             restClient.patch()
                     .uri(url)
