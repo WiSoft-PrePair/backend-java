@@ -5,8 +5,10 @@ import io.wisoft.prepair.prepair_api.global.client.member.dto.MembersData;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberServiceResponse;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+
 import java.util.Map;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +75,36 @@ public class MemberServiceClient {
                     .body(Map.of("memberId", memberId, "score", score))
                     .retrieve()
                     .toBodilessEntity();
+
+        } catch (HttpServerErrorException e) {
+            log.error("Member 서비스 오류", e);
+            throw new BusinessException(ErrorCode.MEMBER_SERVICE_ERROR);
+        } catch (ResourceAccessException e) {
+            log.error("Member 서비스 연결 실패", e);
+            throw new BusinessException(ErrorCode.MEMBER_SERVICE_UNAVAILABLE);
+        } catch (Exception e) {
+            log.error("Member 서비스 호출 실패", e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+        }
+    }
+
+    public MemberSchedulerInfo getMember(UUID memberId) {
+        try {
+            String url = memberServiceUrl + "/api/members/" + memberId;
+
+            MemberServiceResponse<MemberSchedulerInfo> response = restClient.get()
+                    .uri(url)
+                    .header("x-api-prepair", apiKey)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+
+            if (response == null || response.data() == null) {
+                log.error("Member 서비스 응답 없음 - memberId: {}", memberId);
+                throw new BusinessException(ErrorCode.MEMBER_SERVICE_ERROR);
+            }
+
+            return response.data();
 
         } catch (HttpServerErrorException e) {
             log.error("Member 서비스 오류", e);

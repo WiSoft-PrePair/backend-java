@@ -1,5 +1,6 @@
 package io.wisoft.prepair.prepair_api.service;
 
+import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
@@ -27,6 +28,10 @@ public class InterviewQuestionService {
 
     public InterviewQuestion saveCompanyQuestion(UUID memberId, QuestionWithTags result, JobPosting jobPosting) {
         return save(memberId, QuestionType.COMPANY, jobPosting, result);
+    }
+
+    public InterviewQuestion saveVideoQuestion(UUID memberId, QuestionWithTags result) {
+        return save(memberId, QuestionType.VIDEO, null, result);
     }
 
     public InterviewQuestion save(UUID memberId, QuestionType questionType, JobPosting jobPosting, QuestionWithTags result) {
