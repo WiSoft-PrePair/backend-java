@@ -58,7 +58,7 @@ public class OpenAiClient {
         try {
             return objectMapper.readValue(
                     content,
-                    new TypeReference<List<QuestionWithTags>>() {}
+                    new TypeReference<>() {}
             );
         } catch (JsonProcessingException e) {
             log.error("OpenAI 응답 파싱 실패");
@@ -72,8 +72,6 @@ public class OpenAiClient {
     public String generateText(String prompt) {
         return call(OpenAiRequest.of(model, prompt));
     }
-
-
 
     private String call(OpenAiRequest request) {
         try {

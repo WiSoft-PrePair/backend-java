@@ -1,14 +1,17 @@
 package io.wisoft.prepair.prepair_api.controller;
 
 import io.wisoft.prepair.prepair_api.controller.dto.request.AnswerRequest;
+import io.wisoft.prepair.prepair_api.controller.dto.request.VideoInterviewRequest;
 import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.InterviewService;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -62,6 +65,20 @@ public class InterviewController {
     ) {
         FeedbackResponse data = interviewService.submitAnswer(interviewId, memberId, request.answer(), request.answerType(), request.mediaUrl());
         return ApiResponse.created(data, "답변이 제출되었습니다.");
+    }
+
+    @PostMapping("/me/video")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<List<QuestionResponse>> generateVideoQuestion(
+            @RequestHeader("X-User-Id") UUID memberId,
+            @RequestBody @Valid VideoInterviewRequest request
+    ) {
+        List<QuestionResponse> data = interviewService.generateVideoQuestions(memberId, request)
+                .stream()
+                .map(QuestionResponse::from)
+                .toList();
+
+        return ApiResponse.created(data, "화상 면접 질문이 생성되었습니다.");
     }
 }
 

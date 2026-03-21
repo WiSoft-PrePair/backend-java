@@ -1,15 +1,17 @@
 package io.wisoft.prepair.prepair_api.service;
 
+import io.wisoft.prepair.prepair_api.controller.dto.request.VideoInterviewRequest;
 import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
-import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
-import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberSchedulerInfo;
+import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
+import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 
@@ -64,5 +66,19 @@ public class InterviewService {
 
     public FeedbackResponse submitAnswer(UUID questionId, UUID memberId, String answer, AnswerType answerType, String mediaUrl) {
         return interviewAnswerService.submitAnswer(questionId, memberId, answer, answerType, mediaUrl);
+    }
+
+
+    public List<InterviewQuestion> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
+        MemberSchedulerInfo member = memberServiceClient.getMember(memberId);
+        String prompt = promptBuilder.buildVideoQuestionPrompt(member.job(), request.count());
+        List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
+
+        List<InterviewQuestion> questions = results.stream()
+                .map(result -> interviewQuestionService.saveVideoQuestion(memberId, result))
+                .toList();
+
+        log.info("화상 면접 질문 생성 완료 - memberId: {}", memberId);
+        return questions;
     }
 }
