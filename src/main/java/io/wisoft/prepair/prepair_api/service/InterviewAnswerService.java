@@ -8,6 +8,7 @@ import io.wisoft.prepair.prepair_api.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.entity.InterviewFeedback;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
+import io.wisoft.prepair.prepair_api.entity.enums.FeedbackType;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionStatus;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
@@ -18,7 +19,9 @@ import io.wisoft.prepair.prepair_api.repository.InterviewAnswerRepository;
 import io.wisoft.prepair.prepair_api.repository.InterviewFeedbackRepository;
 import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
 import io.wisoft.prepair.prepair_api.service.dto.FeedbackResult;
+
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +68,7 @@ public class InterviewAnswerService {
         InterviewAnswer interviewAnswer = saveAnswer(question, answer, answerType, mediaUrl);
 
         InterviewFeedback feedback = feedbackRepository.save(
-                new InterviewFeedback(interviewAnswer, serializeFeedback(detail), result.score())
+                new InterviewFeedback(interviewAnswer, serializeFeedback(detail), FeedbackType.TEXT, result.score())
         );
 
         boolean isFirstFeedback = question.getLatestScore() == null;
