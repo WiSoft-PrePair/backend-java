@@ -1,10 +1,9 @@
 package io.wisoft.prepair.prepair_api.service;
 
-import io.wisoft.prepair.prepair_api.controller.dto.request.VideoInterviewRequest;
-import io.wisoft.prepair.prepair_api.controller.dto.response.FeedbackResponse;
+import io.wisoft.prepair.prepair_api.dto.request.VideoInterviewRequest;
+import io.wisoft.prepair.prepair_api.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
-import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
@@ -19,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -64,10 +64,9 @@ public class InterviewService {
         }
     }
 
-    public FeedbackResponse submitAnswer(UUID questionId, UUID memberId, String answer, AnswerType answerType, String mediaUrl) {
-        return interviewAnswerService.submitAnswer(questionId, memberId, answer, answerType, mediaUrl);
+    public FeedbackResponse submitAnswer(UUID questionId, UUID memberId, String answer) {
+        return interviewAnswerService.submitAnswer(questionId, memberId, answer);
     }
-
 
     public List<InterviewQuestion> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
         MemberSchedulerInfo member = memberServiceClient.getMember(memberId);
@@ -80,5 +79,9 @@ public class InterviewService {
 
         log.info("화상 면접 질문 생성 완료 - memberId: {}", memberId);
         return questions;
+    }
+
+    public void submitVideoAnswer(final UUID questionId, final UUID memberId, final MultipartFile video) {
+        interviewAnswerService.submitVideoAnswer(questionId, memberId, video);
     }
 }

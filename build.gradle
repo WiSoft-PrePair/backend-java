@@ -39,7 +39,7 @@ dependencies {
 	// 이메일
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-    runtimeOnly 'org.postgresql:postgresql'
+	runtimeOnly 'org.postgresql:postgresql'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

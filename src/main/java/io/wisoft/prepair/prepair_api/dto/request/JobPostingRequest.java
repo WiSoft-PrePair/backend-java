@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.controller.dto.request;
+package io.wisoft.prepair.prepair_api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.URL;

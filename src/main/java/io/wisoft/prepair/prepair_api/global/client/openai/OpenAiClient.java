@@ -8,13 +8,21 @@ import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiResponse;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
+
+import java.io.File;
 import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
@@ -32,6 +40,12 @@ public class OpenAiClient {
 
     @Value("${external.openai.model}")
     private String model;
+
+    @Value("${external.openai.whisper-url}")
+    private String whisperUrl;
+
+    @Value("${external.openai.whisper-model}")
+    private String whisperModel;
 
     /**
      * 단일 질문 생성
@@ -58,7 +72,8 @@ public class OpenAiClient {
         try {
             return objectMapper.readValue(
                     content,
-                    new TypeReference<>() {}
+                    new TypeReference<>() {
+                    }
             );
         } catch (JsonProcessingException e) {
             log.error("OpenAI 응답 파싱 실패");
@@ -67,7 +82,7 @@ public class OpenAiClient {
     }
 
     /**
-     *  JSON 구조화 요청
+     * JSON 구조화 요청
      */
     public String generateText(String prompt) {
         return call(OpenAiRequest.of(model, prompt));
@@ -91,6 +106,42 @@ public class OpenAiClient {
         } catch (Exception e) {
             log.error("OpenAI 호출 실패", e);
             throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
+        }
+    }
+
+    public String transcribe(MultipartFile video) {
+        try {
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", new InputStreamResource(video.getInputStream()) {
+                @Override
+                public String getFilename() {
+                    return video.getOriginalFilename();
+                }
+
+                @Override
+                public long contentLength() {
+                    return video.getSize();
+                }
+            });
+            body.add("model", whisperModel);
+            body.add("language", "ko");
+
+            WhisperResponse response = restClient.post()
+                    .uri(whisperUrl)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.MULTIPART_FORM_DATA)
+                    .body(body)
+                    .retrieve()
+                    .body(WhisperResponse.class);
+
+            if (response == null || response.text() == null) {
+                throw new BusinessException(ErrorCode.OPENAI_INVALID_RESPONSE);
+            }
+
+            return response.text();
+        } catch (Exception e) {
+            log.error("Whisper STT 호출 실패", e);
+            throw new BusinessException(ErrorCode.STT_FAILED);
         }
     }
 }

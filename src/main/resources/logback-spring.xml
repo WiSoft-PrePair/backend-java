@@ -2,30 +2,44 @@
 <configuration>
     <springProperty name="SERVICE_NAME" source="spring.application.name" defaultValue="prepair-api"/>
 
-    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-            <providers>
-                <pattern>
-                    <pattern>
-                        {
-                            "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z', UTC}",
-                            "level": "%level",
-                            "service": "${SERVICE_NAME}",
-                            "correlationId": "%mdc{correlationId}",
-                            "message": "%message",
-                            "module": "%logger{0}",
-                            "error": {
-                                "type": "%mdc{errorType}",
-                                "message": "%mdc{errorMessage}"
-                            }
-                        }
-                    </pattern>
-                </pattern>
-            </providers>
-        </encoder>
-    </appender>
+    <springProfile name="local">
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
 
-    <root level="INFO">
-        <appender-ref ref="JSON_CONSOLE"/>
-    </root>
+    <springProfile name="prod">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+                <providers>
+                    <pattern>
+                        <pattern>
+                            {
+                                "timestamp": "%date{yyyy-MM-dd'T'HH:mm:ss.SSS'Z', UTC}",
+                                "level": "%level",
+                                "service": "${SERVICE_NAME}",
+                                "correlationId": "%mdc{correlationId}",
+                                "message": "%message",
+                                "module": "%logger{0}",
+                                "error": {
+                                    "type": "%mdc{errorType}",
+                                    "message": "%mdc{errorMessage}"
+                                }
+                            }
+                        </pattern>
+                    </pattern>
+                </providers>
+            </encoder>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+    </springProfile>
 </configuration>

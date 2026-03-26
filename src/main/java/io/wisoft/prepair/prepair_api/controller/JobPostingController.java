@@ -1,7 +1,7 @@
 package io.wisoft.prepair.prepair_api.controller;
 
-import io.wisoft.prepair.prepair_api.controller.dto.request.JobPostingRequest;
-import io.wisoft.prepair.prepair_api.controller.dto.response.CompanyQuestionResponse;
+import io.wisoft.prepair.prepair_api.dto.request.JobPostingRequest;
+import io.wisoft.prepair.prepair_api.dto.response.CompanyQuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.InterviewService;
@@ -24,7 +24,7 @@ public class JobPostingController {
     private final JobPostingService jobPostingService;
     private final InterviewService interviewService;
 
-    @PostMapping("/me/company")
+    @PostMapping("/questions/company")
     public ApiResponse<CompanyQuestionResponse> crawl(
             @RequestHeader("X-User-Id") final UUID memberId,
             @Valid @RequestBody final JobPostingRequest request

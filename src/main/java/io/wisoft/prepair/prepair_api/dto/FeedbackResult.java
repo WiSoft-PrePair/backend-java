@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.service.dto;
+package io.wisoft.prepair.prepair_api.dto;
 
 public record FeedbackResult(
         String good,
