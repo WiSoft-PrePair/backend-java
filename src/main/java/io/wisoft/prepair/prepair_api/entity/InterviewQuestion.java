@@ -18,6 +18,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -74,5 +76,11 @@ public class InterviewQuestion extends BaseTimeEntity {
 
     public void updateLatestScore(final Integer score) {
         this.latestScore = score;
+    }
+
+    public boolean isTodayQuestionFirstAnswer() {
+        return questionType == QuestionType.TEXT
+                && getCreatedAt().toLocalDate().equals(LocalDate.now())
+                && latestScore == null;
     }
 }

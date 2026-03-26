@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.controller.dto.response;
+package io.wisoft.prepair.prepair_api.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;

@@ -17,6 +17,7 @@ public class TodayQuestionScheduler {
     private final TodayQuestionService todayQuestionService;
 
     @Scheduled(cron = "0 0 9 * * *")
+//    @Scheduled(cron = "0 */5 * * * *")
     public void generateTodayQuestions() {
         String correlationId = "SCHEDULER-" + UUID.randomUUID().toString();
         MDC.put("correlationId", correlationId);

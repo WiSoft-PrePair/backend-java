@@ -1,6 +1,5 @@
 package io.wisoft.prepair.prepair_api.service;
 
-import io.wisoft.prepair.prepair_api.controller.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;

@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.controller.dto.response;
+package io.wisoft.prepair.prepair_api.dto.response;
 
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionStatus;

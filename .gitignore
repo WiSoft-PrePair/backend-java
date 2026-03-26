@@ -41,9 +41,5 @@ out/
 postgres-data/
 
 
-### 설정 파일 ###
-application.properties
-application.yml
-application.yaml
-
 CLAUDE.md
+docs/

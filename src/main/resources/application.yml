@@ -1,0 +1,41 @@
+server:
+  port: 7300
+
+spring:
+  application:
+    name: interview-service
+
+  profiles:
+    active: local
+
+  config:
+    import: optional:file:.env[.properties]
+
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 30MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+external:
+  member-service:
+    url: https://prepair.wisoft.dev
+    api-key: ${MEMBER_SERVICE_API_KEY}
+
+  openai:
+    api-key: ${OPENAI_API_KEY}
+    api-url: https://api.openai.com/v1/chat/completions
+    model: gpt-4o-mini
+    whisper-url: https://api.openai.com/v1/audio/transcriptions
+    whisper-model: whisper-1
