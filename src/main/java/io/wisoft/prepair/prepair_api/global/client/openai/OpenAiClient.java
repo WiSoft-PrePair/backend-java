@@ -9,13 +9,14 @@ import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -109,22 +110,24 @@ public class OpenAiClient {
         }
     }
 
-    public String transcribe(MultipartFile video) {
+    public String transcribe(Path audioPath, String tags) {
         try {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new InputStreamResource(video.getInputStream()) {
+            body.add("file", new InputStreamResource(Files.newInputStream(audioPath)) {
                 @Override
                 public String getFilename() {
-                    return video.getOriginalFilename();
+                    return audioPath.getFileName().toString();
                 }
 
                 @Override
-                public long contentLength() {
-                    return video.getSize();
+                public long contentLength() throws IOException {
+                    return Files.size(audioPath);
                 }
             });
             body.add("model", whisperModel);
             body.add("language", "ko");
+            body.add("prompt", tags);
+            body.add("temperature", "0");
 
             WhisperResponse response = restClient.post()
                     .uri(whisperUrl)
