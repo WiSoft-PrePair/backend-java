@@ -66,7 +66,7 @@ public class InterviewAnswerService {
         InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
-        String answer = speechToTextService.transcribe(video);
+        String answer = speechToTextService.transcribe(video, question.getQuestionTag());
         FeedbackResult result = generateTextFeedback(question, answer);
         FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 

@@ -25,7 +25,8 @@ FROM mcr.microsoft.com/playwright/java:v1.49.0-noble
 
 WORKDIR /app
 
-# 빌드된 JAR 복사
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 포트 문서화

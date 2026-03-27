@@ -43,7 +43,8 @@ public enum ErrorCode {
     OPENAI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답 파싱에 실패했습니다."),
     OPENAI_INVALID_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답이 유효하지 않습니다."),
     STT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "음성 텍스트 변환에 실패했습니다."),
-    VIDEO_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "파일 크기가 제한을 초과했습니다. (최대 25MB)");
+    VIDEO_CONVERSION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "영상 변환에 실패했습니다."),
+    VIDEO_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "파일 크기가 제한을 초과했습니다. (최대 150MB)");
 
     private final HttpStatus httpStatus;
     private final String message;
