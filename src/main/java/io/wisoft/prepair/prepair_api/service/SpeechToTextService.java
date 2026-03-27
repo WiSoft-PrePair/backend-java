@@ -1,5 +1,6 @@
 package io.wisoft.prepair.prepair_api.service;
 
+import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,7 @@ public class SpeechToTextService {
 
     private final OpenAiClient openAiClient;
 
-    public String transcribe(MultipartFile video) {
-        return openAiClient.transcribe(video);
+    public String transcribe(MultipartFile video, String tags) {
+        return openAiClient.transcribe(video, tags);
     }
 }

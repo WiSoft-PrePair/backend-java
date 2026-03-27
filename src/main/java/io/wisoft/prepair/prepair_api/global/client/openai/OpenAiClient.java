@@ -3,19 +3,18 @@ package io.wisoft.prepair.prepair_api.global.client.openai;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiRequest;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiResponse;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 
-import java.io.File;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -109,7 +108,7 @@ public class OpenAiClient {
         }
     }
 
-    public String transcribe(MultipartFile video) {
+    public String transcribe(MultipartFile video, String tags) {
         try {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", new InputStreamResource(video.getInputStream()) {
@@ -125,6 +124,8 @@ public class OpenAiClient {
             });
             body.add("model", whisperModel);
             body.add("language", "ko");
+            body.add("prompt", tags);
+            body.add("temperature", "0");
 
             WhisperResponse response = restClient.post()
                     .uri(whisperUrl)
