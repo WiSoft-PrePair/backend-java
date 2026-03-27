@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
@@ -141,8 +142,6 @@ public class OpenAiClient {
             }
 
             return response.text();
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("Whisper STT 호출 실패", e);
             throw new BusinessException(ErrorCode.STT_FAILED);
