@@ -41,9 +41,8 @@ public class SpeechToTextService {
             }
 
             return openAiClient.transcribe(outputPath, tags);
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
+            log.error("영상 변환 실패", e);
             throw new BusinessException(ErrorCode.VIDEO_CONVERSION_FAILED);
         } finally {
             deleteTempFile(inputPath);
