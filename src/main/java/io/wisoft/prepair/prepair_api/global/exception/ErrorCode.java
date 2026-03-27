@@ -45,7 +45,7 @@ public enum ErrorCode {
     STT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "음성 텍스트 변환에 실패했습니다."),
 
     // Storage
-    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+    FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
     VIDEO_CONVERSION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "영상 변환에 실패했습니다."),
     VIDEO_FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE, "파일 크기가 제한을 초과했습니다. (최대 150MB)");
 
