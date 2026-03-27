@@ -39,3 +39,13 @@ external:
     model: gpt-4o-mini
     whisper-url: https://api.openai.com/v1/audio/transcriptions
     whisper-model: whisper-1
+
+cloud:
+  aws:
+    s3:
+      endpoint: ${S3_ENDPOINT}
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+      region: ${AWS_REGION}
+      bucket: prepair
+      presigned-url-expiration: 3600
