@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class InterviewPromptBuilder {
+public class PromptBuilder {
 
     public String buildDailyQuestionPrompt(String job, List<InterviewQuestion> previousQuestions) {
         StringBuilder prompt = new StringBuilder();
@@ -104,7 +104,7 @@ public class InterviewPromptBuilder {
                 4. score: 0~100 사이 정수로 점수를 매겨줘.
                 5. 답변이 질문과 무관하거나 내용이 없는 경우, score는 0~10점으로 매기고 good은 "없음"으로 작성해줘.
                 6. 반드시 아래 JSON 형식으로만 응답하고, 마크다운(```json 등)은 포함하지 마.
-                    {
+                    {\
                       "good": "잘한 점",
                       "improvement": "부족한 점",
                       "recommendation": "개선 방향",

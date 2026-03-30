@@ -14,11 +14,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("면접 프롬프트 생성 테스트")
 class InterviewPromptBuilderTest {
 
-    private InterviewPromptBuilder promptBuilder;
+    private PromptBuilder promptBuilder;
 
     @BeforeEach
     void setUp() {
-        promptBuilder = new InterviewPromptBuilder();
+        promptBuilder = new PromptBuilder();
     }
 
     @Test
