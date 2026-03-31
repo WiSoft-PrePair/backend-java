@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.service;
+package io.wisoft.prepair.prepair_api.service.company;
 
 import io.wisoft.prepair.prepair_api.crawler.CrawlerFactory;
 import io.wisoft.prepair.prepair_api.crawler.JobPostingCrawler;

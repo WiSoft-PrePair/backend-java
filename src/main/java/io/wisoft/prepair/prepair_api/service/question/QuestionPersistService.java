@@ -1,10 +1,10 @@
-package io.wisoft.prepair.prepair_api.service;
+package io.wisoft.prepair.prepair_api.service.question;
 
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 
 import java.util.UUID;
 
@@ -17,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class InterviewQuestionService {
+public class QuestionPersistService {
 
-    private final InterviewQuestionRepository questionRepository;
+    private final QuestionRepository questionRepository;
 
     public InterviewQuestion saveTodayQuestion(UUID memberId, QuestionWithTags result) {
         return save(memberId, QuestionType.TEXT, null, result);

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface InterviewQuestionRepository extends JpaRepository<InterviewQuestion, UUID> {
+public interface QuestionRepository extends JpaRepository<InterviewQuestion, UUID> {
 
     List<InterviewQuestion> findByMemberId(UUID memberId);
 

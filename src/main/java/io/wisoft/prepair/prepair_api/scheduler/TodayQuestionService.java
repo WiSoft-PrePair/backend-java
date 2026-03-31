@@ -8,9 +8,9 @@ import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.notification.kakao.KakaoService;
-import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
-import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
-import io.wisoft.prepair.prepair_api.service.InterviewQuestionService;
+import io.wisoft.prepair.prepair_api.prompt.PromptBuilder;
+import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
+import io.wisoft.prepair.prepair_api.service.question.QuestionPersistService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TodayQuestionService {
 
-    private final InterviewQuestionRepository questionRepository;
-    private final InterviewQuestionService interviewQuestionService;
+    private final QuestionRepository questionRepository;
+    private final QuestionPersistService interviewQuestionService;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
-    private final InterviewPromptBuilder promptBuilder;
+    private final PromptBuilder promptBuilder;
     private final EmailService emailService;
     private final KakaoService kakaoService;
 

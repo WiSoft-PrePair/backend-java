@@ -1,7 +1,6 @@
-package io.wisoft.prepair.prepair_api.service;
+package io.wisoft.prepair.prepair_api.service.question;
 
 import io.wisoft.prepair.prepair_api.dto.request.VideoInterviewRequest;
-import io.wisoft.prepair.prepair_api.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
@@ -11,14 +10,13 @@ import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.global.client.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.prompt.InterviewPromptBuilder;
-import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+import io.wisoft.prepair.prepair_api.prompt.PromptBuilder;
+import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,14 +25,13 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class InterviewService {
+public class QuestionService {
 
-    private final InterviewQuestionRepository questionRepository;
-    private final InterviewQuestionService interviewQuestionService;
-    private final InterviewAnswerService interviewAnswerService;
+    private final QuestionRepository questionRepository;
+    private final QuestionPersistService interviewQuestionService;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
-    private final InterviewPromptBuilder promptBuilder;
+    private final PromptBuilder promptBuilder;
 
     @Transactional(readOnly = true)
     public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
@@ -64,10 +61,6 @@ public class InterviewService {
         }
     }
 
-    public FeedbackResponse submitAnswer(UUID questionId, UUID memberId, String answer) {
-        return interviewAnswerService.submitAnswer(questionId, memberId, answer);
-    }
-
     public List<InterviewQuestion> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
         MemberSchedulerInfo member = memberServiceClient.getMember(memberId);
         String prompt = promptBuilder.buildVideoQuestionPrompt(member.job(), request.count());
@@ -79,9 +72,5 @@ public class InterviewService {
 
         log.info("화상 면접 질문 생성 완료 - memberId: {}", memberId);
         return questions;
-    }
-
-    public void submitVideoAnswer(final UUID questionId, final UUID memberId, final MultipartFile video) {
-        interviewAnswerService.submitVideoAnswer(questionId, memberId, video);
     }
 }
