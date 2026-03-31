@@ -89,24 +89,6 @@ public class FileUploader {
         log.info("파일 삭제 완료 - key: {}", key);
     }
 
-    public Path download(String mediaUrl) {
-        try {
-            String key = extractKey(mediaUrl);
-            Path tempFile = Files.createTempFile("video-", ".tmp");
-
-            s3Client.getObject(GetObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .build(), tempFile);
-
-            log.info("파일 다운로드 완료 - key: {}", key);
-            return tempFile;
-        } catch (Exception e) {
-            log.error("파일 다운로드 실패", e);
-            throw new BusinessException(ErrorCode.FILE_DOWNLOAD_FAILED);
-        }
-    }
-
     public String generatePresignedUrl(String mediaUrl) {
         String key = extractKey(mediaUrl);
         String presignedUrl = s3Presigner.presignGetObject(
