@@ -55,6 +55,6 @@ public class AnswerService {
 
         videoAnswerAnalyzer.analyzeSTT(questionId, memberId, mediaUrl, question.getQuestionTag());
 
-        log.info("영상 답변 처리 완료 - questionId: {}, mediaUrl: {}", questionId, mediaUrl);
+        log.info("영상 S3 업로드 완료, STT 비동기 분석 트리거 - questionId: {}", questionId);
     }
 }

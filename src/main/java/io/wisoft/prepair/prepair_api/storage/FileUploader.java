@@ -4,7 +4,6 @@ import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -53,10 +52,10 @@ public class FileUploader {
             );
 
             String url = endpoint + "/" + bucket + "/" + key;
-            log.info("파일 업로드 완료 - url: {}", url);
+            log.info("영상 S3 업로드 완료 - key: {}", key);
             return url;
         } catch (IOException e) {
-            log.error("파일 업로드 실패", e);
+            log.error("영상 S3 업로드 실패 - bucket: {}, error: {}", bucket, e.getMessage(), e);
             throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
     }
@@ -64,17 +63,17 @@ public class FileUploader {
     public Path download(String mediaUrl) {
         try {
             String key = extractKey(mediaUrl);
-            Path tempFile = Files.createTempFile("video-", ".tmp");
+            Path tempFile = Path.of(System.getProperty("java.io.tmpdir"), "video-" + UUID.randomUUID() + ".tmp");
 
             s3Client.getObject(GetObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
                     .build(), tempFile);
 
-            log.info("파일 다운로드 완료 - key: {}", key);
+            log.info("영상 S3 다운로드 완료 - key: {}", key);
             return tempFile;
         } catch (Exception e) {
-            log.error("파일 다운로드 실패", e);
+            log.error("영상 S3 다운로드 실패 - mediaUrl: {}, error: {}", mediaUrl, e.getMessage(), e);
             throw new BusinessException(ErrorCode.FILE_DOWNLOAD_FAILED);
         }
     }
@@ -86,7 +85,7 @@ public class FileUploader {
                 .key(key)
                 .build()
         );
-        log.info("파일 삭제 완료 - key: {}", key);
+        log.info("영상 S3 삭제 완료 - key: {}", key);
     }
 
     public String generatePresignedUrl(String mediaUrl) {

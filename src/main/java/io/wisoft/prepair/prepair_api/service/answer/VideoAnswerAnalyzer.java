@@ -48,9 +48,9 @@ public class VideoAnswerAnalyzer {
             answerPersistService.saveAnswerAndFeedback(
                     questionId, memberId, answer, result, detail, AnswerType.VIDEO, FeedbackType.STT);
 
-            log.info("STT 분석 완료 - questionId: {}", questionId);
+            log.info("STT 분석 및 피드백 저장 완료 - questionId: {}", questionId);
         } catch (Exception e) {
-            log.error("STT 분석 실패 - questionId: {}", questionId, e);
+            log.error("STT 분석 실패 - questionId: {}, error: {}", questionId, e.getMessage(), e);
         }
     }
 }
