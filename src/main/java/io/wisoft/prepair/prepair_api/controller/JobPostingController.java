@@ -4,8 +4,8 @@ import io.wisoft.prepair.prepair_api.dto.request.JobPostingRequest;
 import io.wisoft.prepair.prepair_api.dto.response.CompanyQuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
-import io.wisoft.prepair.prepair_api.service.InterviewService;
-import io.wisoft.prepair.prepair_api.service.JobPostingService;
+import io.wisoft.prepair.prepair_api.service.question.QuestionService;
+import io.wisoft.prepair.prepair_api.service.company.JobPostingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +22,7 @@ import java.util.UUID;
 public class JobPostingController {
 
     private final JobPostingService jobPostingService;
-    private final InterviewService interviewService;
+    private final QuestionService interviewService;
 
     @PostMapping("/questions/company")
     public ApiResponse<CompanyQuestionResponse> crawl(

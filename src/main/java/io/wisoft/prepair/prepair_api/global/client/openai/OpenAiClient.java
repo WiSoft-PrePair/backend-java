@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
@@ -136,23 +135,23 @@ public class OpenAiClient {
         }
     }
 
-    public String transcribe(Path audioPath, String tags) {
+    public String speechToText(Path mediaPath, String questionTags) {
         try {
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", new InputStreamResource(Files.newInputStream(audioPath)) {
+            body.add("file", new InputStreamResource(Files.newInputStream(mediaPath)) {
                 @Override
                 public String getFilename() {
-                    return audioPath.getFileName().toString();
+                    return mediaPath.getFileName().toString();
                 }
 
                 @Override
                 public long contentLength() throws IOException {
-                    return Files.size(audioPath);
+                    return Files.size(mediaPath);
                 }
             });
             body.add("model", whisperModel);
             body.add("language", "ko");
-            body.add("prompt", tags);
+            body.add("prompt", questionTags);
             body.add("temperature", "0");
 
             WhisperResponse response = restClient.post()

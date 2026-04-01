@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.service;
+package io.wisoft.prepair.prepair_api.service.answer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,10 +13,12 @@ import io.wisoft.prepair.prepair_api.entity.enums.QuestionStatus;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
-import io.wisoft.prepair.prepair_api.repository.InterviewAnswerRepository;
-import io.wisoft.prepair.prepair_api.repository.InterviewFeedbackRepository;
-import io.wisoft.prepair.prepair_api.repository.InterviewQuestionRepository;
+import io.wisoft.prepair.prepair_api.repository.AnswerRepository;
+import io.wisoft.prepair.prepair_api.repository.FeedbackRepository;
+import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
+
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,14 +27,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InterviewAnswerPersistService {
+public class AnswerPersistService {
 
-    private final InterviewQuestionRepository questionRepository;
-    private final InterviewAnswerRepository answerRepository;
-    private final InterviewFeedbackRepository feedbackRepository;
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
+    private final FeedbackRepository feedbackRepository;
     private final MemberServiceClient memberServiceClient;
     private final ObjectMapper objectMapper;
-
 
     @Transactional
     public InterviewFeedback saveAnswerAndFeedback(
@@ -41,37 +42,31 @@ public class InterviewAnswerPersistService {
             final AnswerType answerType, final FeedbackType feedbackType
     ) {
         InterviewQuestion question = getQuestion(questionId, memberId);
-
-        // 1. 답변 상태 저장
         question.updateStatus(QuestionStatus.ANSWERED);
 
-        // 2. 답변 저장
         InterviewAnswer interviewAnswer = answerRepository.save(
                 new InterviewAnswer(question, answer, answerType, null)
         );
 
-        // 3. 피드백 저장
         InterviewFeedback feedback = feedbackRepository.save(
                 new InterviewFeedback(interviewAnswer, serializeFeedback(detail), feedbackType, result.score())
         );
 
-        // 4. 적립급 여부 판별
         if (question.isTodayQuestionFirstAnswer()) {
             memberServiceClient.sendScore(memberId, result.score());
         }
 
-        // 5. 점수 업데이트
         question.updateLatestScore(result.score());
 
         return feedback;
     }
 
-
     @Transactional
-    public void saveVideoAnalysisFeedback(final UUID questionId, final UUID memberId, final String answer,
-                                          final FeedbackResult sttResult, final FeedbackDetail sttDetail,
-                                          final String mediaUrl, final FeedbackResult videoResult,
-                                          final FeedbackDetail videoDetail
+    public void saveVideoAnalysisFeedback(
+            final UUID questionId, final UUID memberId, final String answer,
+            final FeedbackResult sttResult, final FeedbackDetail sttDetail,
+            final String mediaUrl, final FeedbackResult videoResult,
+            final FeedbackDetail videoDetail
     ) {
         InterviewQuestion question = getQuestion(questionId, memberId);
         question.updateStatus(QuestionStatus.ANSWERED);
