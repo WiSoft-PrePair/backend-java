@@ -3,12 +3,12 @@ package io.wisoft.prepair.prepair_api.service.answer;
 import io.wisoft.prepair.prepair_api.dto.FeedbackResult;
 import io.wisoft.prepair.prepair_api.dto.response.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
-import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
 import io.wisoft.prepair.prepair_api.entity.enums.FeedbackType;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.service.stt.SpeechToTextService;
+import io.wisoft.prepair.prepair_api.service.vidoe.VideoAnalysisService;
 import io.wisoft.prepair.prepair_api.storage.FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,19 +25,29 @@ public class VideoAnswerAnalyzer {
 
     private final AnswerPersistService answerPersistService;
     private final SpeechToTextService speechToTextService;
+    private final VideoAnalysisService videoAnalysisService;
     private final QuestionRepository questionRepository;
     private final FileUploader fileUploader;
     private final FeedbackGenerator feedbackGenerator;
 
-    /**
-     * S3에서 영상을 다운로드하여 STT 변환 후 피드백을 생성하고 저장한다.
-     * 비동기로 실행되며, 실패 시 로그만 남기고 종료한다.
-     */
     @Async("videoTaskExecutor")
-    public void analyzeSTT(final UUID questionId, final UUID memberId, final String mediaUrl, final String questionTags) {
+    public void uploadToS3(final UUID answerId, final byte[] videoBytes,
+                           final String contentType, final String originalFilename, final String email) {
         try {
-            Path videoPath = fileUploader.download(mediaUrl);
+            String mediaUrl = fileUploader.upload(videoBytes, contentType, originalFilename, email);
+            answerPersistService.updateMediaUrl(answerId, mediaUrl);
+            log.info("[S3] 업로드 완료 - answerId: {}", answerId);
+        } catch (Exception e) {
+            log.error("S3 업로드 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+        }
+    }
+
+    @Async("videoTaskExecutor")
+    public void analyzeSTT(final UUID answerId, final UUID questionId, final UUID memberId,
+                           final Path videoPath, final String questionTags) {
+        try {
             String answer = speechToTextService.convertToTextFromPath(videoPath, questionTags);
+            answerPersistService.updateAnswer(answerId, answer);
 
             InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
@@ -45,12 +55,23 @@ public class VideoAnswerAnalyzer {
             FeedbackResult result = feedbackGenerator.generate(question, answer);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
-            answerPersistService.saveAnswerAndFeedback(
-                    questionId, memberId, answer, result, detail, AnswerType.VIDEO, FeedbackType.STT);
-
-            log.info("STT 분석 및 피드백 저장 완료 - questionId: {}", questionId);
+            answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.STT);
+            log.info("[STT] 완료 - answerId: {}", answerId);
         } catch (Exception e) {
-            log.error("STT 분석 실패 - questionId: {}, error: {}", questionId, e.getMessage(), e);
+            log.error("STT 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+        }
+    }
+
+    @Async("videoTaskExecutor")
+    public void analyzeVideo(final UUID answerId, final Path videoPath) {
+        try {
+            FeedbackResult result = videoAnalysisService.analyze(videoPath);
+            FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
+
+            answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
+            log.info("[VIDEO] 완료 - answerId: {}", answerId);
+        } catch (Exception e) {
+            log.error("비디오 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
         }
     }
 }

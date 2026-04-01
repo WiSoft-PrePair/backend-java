@@ -8,11 +8,11 @@ import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.prompt.VideoAnalysisPromptBuilder;
 import io.wisoft.prepair.prepair_api.video.FrameExtractor;
+import java.nio.file.Path;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -24,17 +24,18 @@ public class VideoAnalysisService {
     private final VideoAnalysisPromptBuilder promptBuilder;
     private final ObjectMapper objectMapper;
 
-    public FeedbackResult analyze(final MultipartFile video) {
-        // 1. 프레임 추출 + 샘플링
-        List<String> frames = frameExtractor.extractFrames(video);
+    public FeedbackResult analyze(final Path videoPath) {
+        List<String> frames = frameExtractor.extractFrames(videoPath);
+        return analyzeFrames(frames);
+    }
+
+    private FeedbackResult analyzeFrames(List<String> frames) {
         log.info("프레임 추출 완료 - {}개", frames.size());
 
-        // 2. GPT-4o Vision 분석
         String prompt = promptBuilder.buildVisionPrompt();
         String result = openAiClient.analyzeWithVision(prompt, frames);
         log.info("비디오 분석 완료");
 
-        // 3. Vision 응답 → FeedbackResult 변환
         return parseVisionResponse(result);
     }
 
