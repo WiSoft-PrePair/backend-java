@@ -62,28 +62,36 @@ public class AnswerPersistService {
     }
 
     @Transactional
-    public void saveVideoAnalysisFeedback(
-            final UUID questionId, final UUID memberId, final String answer,
-            final FeedbackResult sttResult, final FeedbackDetail sttDetail,
-            final String mediaUrl, final FeedbackResult videoResult,
-            final FeedbackDetail videoDetail
-    ) {
+    public InterviewAnswer createVideoAnswer(final UUID questionId, final UUID memberId) {
         InterviewQuestion question = getQuestion(questionId, memberId);
         question.updateStatus(QuestionStatus.ANSWERED);
 
-        InterviewAnswer interviewAnswer = answerRepository.save(
-                new InterviewAnswer(question, answer, AnswerType.VIDEO, mediaUrl));
+        return answerRepository.save(
+                new InterviewAnswer(question, "", AnswerType.VIDEO, null));
+    }
 
-        // STT 피드백
-        feedbackRepository.save(new InterviewFeedback(interviewAnswer, serializeFeedback(sttDetail), FeedbackType.STT,
-                sttResult.score()));
+    @Transactional
+    public void updateMediaUrl(final UUID answerId, final String mediaUrl) {
+        InterviewAnswer interviewAnswer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+        interviewAnswer.updateMediaUrl(mediaUrl);
+    }
 
-        // 비디오 분석 피드백
+    @Transactional
+    public void updateAnswer(final UUID answerId, final String answer) {
+        InterviewAnswer interviewAnswer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+        interviewAnswer.updateAnswer(answer);
+    }
+
+    @Transactional
+    public void saveFeedback(final UUID answerId, final FeedbackResult result,
+                             final FeedbackDetail detail, final FeedbackType feedbackType) {
+        InterviewAnswer interviewAnswer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+
         feedbackRepository.save(
-                new InterviewFeedback(interviewAnswer, serializeFeedback(videoDetail), FeedbackType.VIDEO,
-                        videoResult.score()));
-
-        log.info("비디오 분석 피드백 저장 완료 - answerId: {}", interviewAnswer.getId());
+                new InterviewFeedback(interviewAnswer, serializeFeedback(detail), feedbackType, result.score()));
     }
 
     private InterviewQuestion getQuestion(UUID questionId, UUID memberId) {

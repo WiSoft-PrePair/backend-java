@@ -10,13 +10,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Component
@@ -25,39 +23,12 @@ public class FrameExtractor {
     private static final int SAMPLE_COUNT = 15;
     private static final long FFMPEG_TIMEOUT_SECONDS = 120;
 
-    public List<String> extractFrames(MultipartFile video) {
+    public List<String> extractFrames(Path videoPath) {
         Path tempDir = null;
 
         try {
             tempDir = Files.createTempDirectory("frames-");
-            String extension = getExtension(video.getOriginalFilename());
-            Path tempVideo = tempDir.resolve(UUID.randomUUID() + extension);
-            video.transferTo(tempVideo.toFile());
-
-            ProcessBuilder pb = new ProcessBuilder(
-                    "ffmpeg", "-i", tempVideo.toString(),
-                    "-vf", "fps=1",
-                    "-q:v", "2",
-                    tempDir.resolve("frame_%04d.jpg").toString()
-            );
-            pb.redirectErrorStream(true);
-            Process process = pb.start();
-
-            drainStream(process.getInputStream());
-
-            boolean finished = process.waitFor(FFMPEG_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            if (!finished) {
-                process.destroyForcibly();
-                log.error("FFmpeg 프레임 추출 타임아웃 - {}초 초과", FFMPEG_TIMEOUT_SECONDS);
-                throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
-            }
-
-            if (process.exitValue() != 0) {
-                log.error("FFmpeg 프레임 추출 실패 - exitCode: {}", process.exitValue());
-                throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
-            }
-
-            return sampleFrames(tempDir);
+            return extractFromPath(tempDir, videoPath);
         } catch (IOException e) {
             log.error("프레임 추출 실패", e);
             throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
@@ -70,15 +41,31 @@ public class FrameExtractor {
         }
     }
 
-    private void drainStream(InputStream is) {
-        Thread.ofVirtual().start(() -> {
-            try (is) {
-                byte[] buf = new byte[8192];
-                while (is.read(buf) != -1) {
-                }
-            } catch (IOException ignored) {
-            }
-        });
+    private List<String> extractFromPath(Path tempDir, Path videoPath) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg", "-i", videoPath.toString(),
+                "-vf", "fps=1",
+                "-q:v", "2",
+                tempDir.resolve("frame_%04d.jpg").toString()
+        );
+        pb.redirectErrorStream(true);
+        Process process = pb.start();
+
+        drainStream(process.getInputStream());
+
+        boolean finished = process.waitFor(FFMPEG_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!finished) {
+            process.destroyForcibly();
+            log.error("FFmpeg 프레임 추출 타임아웃 - {}초 초과", FFMPEG_TIMEOUT_SECONDS);
+            throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
+        }
+
+        if (process.exitValue() != 0) {
+            log.error("FFmpeg 프레임 추출 실패 - exitCode: {}", process.exitValue());
+            throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
+        }
+
+        return sampleFrames(tempDir);
     }
 
     private List<String> sampleFrames(Path frameDir) throws IOException {
@@ -107,11 +94,15 @@ public class FrameExtractor {
         return base64Frames;
     }
 
-    private String getExtension(String filename) {
-        if (filename != null && filename.contains(".")) {
-            return filename.substring(filename.lastIndexOf("."));
-        }
-        return ".mp4";
+    private void drainStream(InputStream is) {
+        Thread.ofVirtual().start(() -> {
+            try (is) {
+                byte[] buf = new byte[8192];
+                while (is.read(buf) != -1) {
+                }
+            } catch (IOException ignored) {
+            }
+        });
     }
 
     private void cleanup(Path dir) {

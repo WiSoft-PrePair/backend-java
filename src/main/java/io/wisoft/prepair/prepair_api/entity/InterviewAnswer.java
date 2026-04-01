@@ -54,4 +54,12 @@ public class InterviewAnswer extends BaseTimeEntity {
         this.answerType = answerType;
         this.mediaUrl = mediaUrl;
     }
+
+    public void updateAnswer(final String answer) {
+        this.answer = answer;
+    }
+
+    public void updateMediaUrl(final String mediaUrl) {
+        this.mediaUrl = mediaUrl;
+    }
 }

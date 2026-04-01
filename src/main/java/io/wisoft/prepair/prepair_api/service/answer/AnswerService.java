@@ -3,6 +3,7 @@ package io.wisoft.prepair.prepair_api.service.answer;
 import io.wisoft.prepair.prepair_api.dto.FeedbackResult;
 import io.wisoft.prepair.prepair_api.dto.response.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.dto.response.FeedbackResponse;
+import io.wisoft.prepair.prepair_api.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.entity.InterviewFeedback;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.enums.AnswerType;
@@ -11,10 +12,10 @@ import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
-import io.wisoft.prepair.prepair_api.storage.FileUploader;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,6 @@ public class AnswerService {
     private final FeedbackGenerator feedbackGenerator;
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
-    private final FileUploader fileUploader;
 
     public FeedbackResponse submitAnswer(final UUID questionId, final UUID memberId, final String answer) {
         InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
@@ -51,10 +51,27 @@ public class AnswerService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
 
         String email = memberServiceClient.getMember(memberId).email();
-        String mediaUrl = fileUploader.upload(video, email);
+        InterviewAnswer answer = answerPersistService.createVideoAnswer(questionId, memberId);
 
-        videoAnswerAnalyzer.analyzeSTT(questionId, memberId, mediaUrl, question.getQuestionTag());
+        try {
+            byte[] videoBytes = video.getBytes();
+            Path videoPath = Files.createTempFile("video-", getExtension(video.getOriginalFilename()));
+            Files.write(videoPath, videoBytes);
 
-        log.info("영상 S3 업로드 완료, STT 비동기 분석 트리거 - questionId: {}", questionId);
+            videoAnswerAnalyzer.uploadToS3(answer.getId(), videoBytes, video.getContentType(), video.getOriginalFilename(), email);
+            videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath, question.getQuestionTag());
+            videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
+
+        } catch (IOException e) {
+            log.error("영상 임시파일 생성 실패", e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+        }
+    }
+
+    private String getExtension(String filename) {
+        if (filename != null && filename.contains(".")) {
+            return filename.substring(filename.lastIndexOf("."));
+        }
+        return ".webm";
     }
 }

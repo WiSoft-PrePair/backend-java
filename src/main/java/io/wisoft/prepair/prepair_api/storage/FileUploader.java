@@ -40,24 +40,28 @@ public class FileUploader {
 
     public String upload(MultipartFile file, String email) {
         try {
-            String extension = getExtension(file);
-            String key = "interview-video/" + email + "/" + LocalDate.now() + "/" + UUID.randomUUID() + extension;
-
-            s3Client.putObject(PutObjectRequest.builder()
-                            .bucket(bucket)
-                            .key(key)
-                            .contentType(file.getContentType())
-                            .build(),
-                    RequestBody.fromBytes(file.getBytes())
-            );
-
-            String url = endpoint + "/" + bucket + "/" + key;
-            log.info("영상 S3 업로드 완료 - key: {}", key);
-            return url;
+            return upload(file.getBytes(), file.getContentType(), file.getOriginalFilename(), email);
         } catch (IOException e) {
             log.error("영상 S3 업로드 실패 - bucket: {}, error: {}", bucket, e.getMessage(), e);
             throw new BusinessException(ErrorCode.FILE_UPLOAD_FAILED);
         }
+    }
+
+    public String upload(byte[] bytes, String contentType, String originalFilename, String email) {
+        String extension = getExtension(originalFilename);
+        String key = "interview-video/" + email + "/" + LocalDate.now() + "/" + UUID.randomUUID() + extension;
+
+        s3Client.putObject(PutObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(key)
+                        .contentType(contentType)
+                        .build(),
+                RequestBody.fromBytes(bytes)
+        );
+
+        String url = endpoint + "/" + bucket + "/" + key;
+        log.info("영상 S3 업로드 완료 - key: {}", key);
+        return url;
     }
 
     public Path download(String mediaUrl) {
@@ -105,11 +109,10 @@ public class FileUploader {
         return mediaUrl.substring(prefix.length());
     }
 
-    private String getExtension(MultipartFile file) {
-        String original = file.getOriginalFilename();
-        if (original == null || !original.contains(".")) {
+    private String getExtension(String filename) {
+        if (filename == null || !filename.contains(".")) {
             return ".webm";
         }
-        return original.substring(original.lastIndexOf("."));
+        return filename.substring(filename.lastIndexOf("."));
     }
 }
