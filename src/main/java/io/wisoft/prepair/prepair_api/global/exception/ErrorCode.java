@@ -44,6 +44,9 @@ public enum ErrorCode {
     OPENAI_INVALID_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답이 유효하지 않습니다."),
     STT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "음성 텍스트 변환에 실패했습니다."),
 
+    // Video Analysis
+    FRAME_EXTRACTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "영상 프레임 추출에 실패했습니다."),
+
     // Storage
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
     VIDEO_CONVERSION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "영상 변환에 실패했습니다."),

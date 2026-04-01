@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiRequest;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiResponse;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
+import io.wisoft.prepair.prepair_api.video.dto.VideoRequest;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 
@@ -106,6 +107,31 @@ public class OpenAiClient {
             return response.getContent();
         } catch (Exception e) {
             log.error("OpenAI 호출 실패", e);
+            throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
+        }
+    }
+
+    public String analyzeWithVision(String prompt, List<String> base64Images) {
+        try {
+            VideoRequest request = VideoRequest.of(model, prompt, base64Images);
+
+            OpenAiResponse response = restClient.post()
+                    .uri(apiUrl)
+                    .header("Authorization", "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(request)
+                    .retrieve()
+                    .body(OpenAiResponse.class);
+
+            if (response == null || response.choices() == null || response.choices().isEmpty()) {
+                log.error("Vision 응답 없음");
+                throw new BusinessException(ErrorCode.OPENAI_INVALID_RESPONSE);
+            }
+            return response.getContent();
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Vision API 호출 실패", e);
             throw new BusinessException(ErrorCode.OPENAI_API_ERROR);
         }
     }
