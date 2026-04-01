@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.video.service;
+package io.wisoft.prepair.prepair_api.service.vidoe;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

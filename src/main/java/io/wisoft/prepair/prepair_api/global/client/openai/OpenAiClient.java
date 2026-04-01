@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiRequest;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.OpenAiResponse;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.video.dto.VideoRequest;
+import io.wisoft.prepair.prepair_api.global.client.openai.dto.VideoRequest;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 

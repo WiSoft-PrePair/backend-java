@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.video.dto;
+package io.wisoft.prepair.prepair_api.global.client.openai.dto;
 
 import java.util.List;
 
