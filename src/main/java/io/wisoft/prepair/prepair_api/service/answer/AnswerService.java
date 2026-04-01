@@ -12,10 +12,11 @@ import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
-import java.io.IOException;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,17 +54,22 @@ public class AnswerService {
         String email = memberServiceClient.getMember(memberId).email();
         InterviewAnswer answer = answerPersistService.createVideoAnswer(questionId, memberId);
 
+        log.info("[VIDEO] 영상 답변 처리 시작 - questionId: {}, memberId: {}", questionId, memberId);
+        Path videoPath = createTempFile(video);
+
+        videoAnswerAnalyzer.uploadToS3(answer.getId(), videoPath, video.getContentType(), email);
+        videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath, question.getQuestionTag());
+        videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
+        log.info("[VIDEO] 비동기 작업 위임 완료 - answerId: {}", answer.getId());
+    }
+
+    private Path createTempFile(MultipartFile video) {
         try {
-            byte[] videoBytes = video.getBytes();
             Path videoPath = Files.createTempFile("video-", getExtension(video.getOriginalFilename()));
-            Files.write(videoPath, videoBytes);
-
-            videoAnswerAnalyzer.uploadToS3(answer.getId(), videoBytes, video.getContentType(), video.getOriginalFilename(), email);
-            videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath, question.getQuestionTag());
-            videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
-
-        } catch (IOException e) {
-            log.error("영상 임시파일 생성 실패", e);
+            video.transferTo(videoPath);
+            return videoPath;
+        } catch (Exception e) {
+            log.error("영상 임시 파일 생성 실패 - filename: {}", video.getOriginalFilename(), e);
             throw new BusinessException(ErrorCode.INTERNAL_ERROR);
         }
     }

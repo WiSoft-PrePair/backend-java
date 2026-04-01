@@ -31,20 +31,21 @@ public class VideoAnswerAnalyzer {
     private final FeedbackGenerator feedbackGenerator;
 
     @Async("videoTaskExecutor")
-    public void uploadToS3(final UUID answerId, final byte[] videoBytes,
-                           final String contentType, final String originalFilename, final String email) {
+    public void uploadToS3(final UUID answerId, final Path videoPath, final String contentType, final String email) {
+        log.info("[VIDEO-S3] 업로드 시작 - answerId: {}", answerId);
         try {
-            String mediaUrl = fileUploader.upload(videoBytes, contentType, originalFilename, email);
+            String mediaUrl = fileUploader.upload(videoPath, contentType, email);
             answerPersistService.updateMediaUrl(answerId, mediaUrl);
-            log.info("[S3] 업로드 완료 - answerId: {}", answerId);
+            log.info("[VIDEO-S3] 업로드 완료 - answerId: {}", answerId);
         } catch (Exception e) {
-            log.error("S3 업로드 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            log.error("[VIDEO-S3] 업로드 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
         }
     }
 
     @Async("videoTaskExecutor")
     public void analyzeSTT(final UUID answerId, final UUID questionId, final UUID memberId,
                            final Path videoPath, final String questionTags) {
+        log.info("[VIDEO-STT] 분석 시작 - answerId: {}", answerId);
         try {
             String answer = speechToTextService.convertToTextFromPath(videoPath, questionTags);
             answerPersistService.updateAnswer(answerId, answer);
@@ -56,22 +57,23 @@ public class VideoAnswerAnalyzer {
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
             answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.STT);
-            log.info("[STT] 완료 - answerId: {}", answerId);
+            log.info("[VIDEO-STT] 분석 완료 - answerId: {}", answerId);
         } catch (Exception e) {
-            log.error("STT 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            log.error("[VIDEO-STT] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
         }
     }
 
     @Async("videoTaskExecutor")
     public void analyzeVideo(final UUID answerId, final Path videoPath) {
+        log.info("[VIDEO-ANALYSIS] 분석 시작 - answerId: {}", answerId);
         try {
             FeedbackResult result = videoAnalysisService.analyze(videoPath);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
             answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
-            log.info("[VIDEO] 완료 - answerId: {}", answerId);
+            log.info("[VIDEO-ANALYSIS] 분석 완료 - answerId: {}", answerId);
         } catch (Exception e) {
-            log.error("비디오 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            log.error("[VIDEO-ANALYSIS] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
         }
     }
 }
