@@ -34,7 +34,6 @@ public class FrameExtractor {
             Path tempVideo = tempDir.resolve(UUID.randomUUID() + extension);
             video.transferTo(tempVideo.toFile());
 
-            // FFmpeg으로 1초당 1프레임 추출
             ProcessBuilder pb = new ProcessBuilder(
                     "ffmpeg", "-i", tempVideo.toString(),
                     "-vf", "fps=1",
@@ -44,7 +43,6 @@ public class FrameExtractor {
             pb.redirectErrorStream(true);
             Process process = pb.start();
 
-            // stdout+stderr를 별도 스레드로 drain하여 파이프 버퍼 블로킹 방지
             drainStream(process.getInputStream());
 
             boolean finished = process.waitFor(FFMPEG_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -59,7 +57,6 @@ public class FrameExtractor {
                 throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
             }
 
-            // 추출된 프레임에서 대표 프레임 샘플링
             return sampleFrames(tempDir);
         } catch (IOException e) {
             log.error("프레임 추출 실패", e);
@@ -78,7 +75,6 @@ public class FrameExtractor {
             try (is) {
                 byte[] buf = new byte[8192];
                 while (is.read(buf) != -1) {
-                    // 출력을 소비만 하고 버림
                 }
             } catch (IOException ignored) {
             }
@@ -99,7 +95,6 @@ public class FrameExtractor {
             throw new BusinessException(ErrorCode.FRAME_EXTRACTION_FAILED);
         }
 
-        // 균등 간격으로 대표 프레임 선택
         List<String> base64Frames = new ArrayList<>();
         int interval = Math.max(1, frames.size() / SAMPLE_COUNT);
 
