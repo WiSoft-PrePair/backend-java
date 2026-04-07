@@ -13,6 +13,7 @@ import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 
+import io.wisoft.prepair.prepair_api.service.answer.event.AnalysisCompletionTracker;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class AnswerService {
     private final FeedbackGenerator feedbackGenerator;
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
+    private final AnalysisCompletionTracker completionTracker;
 
     public FeedbackResponse submitAnswer(final UUID questionId, final UUID memberId, final String answer) {
         InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
@@ -54,13 +56,13 @@ public class AnswerService {
         String email = memberServiceClient.getMember(memberId).email();
         InterviewAnswer answer = answerPersistService.createVideoAnswer(questionId, memberId);
 
-        log.info("[VIDEO] 영상 답변 처리 시작 - questionId: {}, memberId: {}", questionId, memberId);
         Path videoPath = createTempFile(video);
+
+        completionTracker.init(answer.getId(), videoPath);
 
         videoAnswerAnalyzer.uploadToS3(answer.getId(), videoPath, video.getContentType(), email);
         videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath, question.getQuestionTag());
         videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
-        log.info("[VIDEO] 비동기 작업 위임 완료 - answerId: {}", answer.getId());
     }
 
     private Path createTempFile(MultipartFile video) {

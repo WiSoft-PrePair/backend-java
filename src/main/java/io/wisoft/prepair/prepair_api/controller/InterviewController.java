@@ -7,6 +7,7 @@ import io.wisoft.prepair.prepair_api.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.answer.AnswerService;
+import io.wisoft.prepair.prepair_api.global.sse.SseEmitterManager;
 import io.wisoft.prepair.prepair_api.service.question.QuestionService;
 import jakarta.validation.Valid;
 
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 @RestController
@@ -28,6 +30,7 @@ public class InterviewController {
 
     private final QuestionService questionService;
     private final AnswerService answerService;
+    private final SseEmitterManager sseEmitterManager;
 
     @GetMapping("/questions")
     public ApiResponse<List<QuestionResponse>> getQuestions(
@@ -85,6 +88,11 @@ public class InterviewController {
     ) {
         answerService.submitVideoAnswer(questionId, memberId, video);
         return ApiResponse.accepted(null, "영상 답변이 제출되었습니다.");
+    }
+
+    @GetMapping(value = "/questions/video-answers/{sessionId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter subscribeSession(@PathVariable UUID sessionId) {
+        return sseEmitterManager.create(sessionId);
     }
 }
 

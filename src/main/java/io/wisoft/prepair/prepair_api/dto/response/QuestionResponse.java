@@ -15,6 +15,7 @@ public record QuestionResponse(
         QuestionStatus status,
         Integer latestScore,
         UUID jobPostingId,
+        UUID sessionId,
         LocalDateTime createdAt
 ) {
 
@@ -27,6 +28,7 @@ public record QuestionResponse(
                 question.getStatus(),
                 question.getLatestScore(),
                 question.getJobPosting() != null ? question.getJobPosting().getId() : null,
+                question.getInterviewSession() != null ? question.getInterviewSession().getId() : null,
                 question.getCreatedAt()
         );
     }

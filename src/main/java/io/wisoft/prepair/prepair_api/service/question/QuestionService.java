@@ -2,6 +2,7 @@ package io.wisoft.prepair.prepair_api.service.question;
 
 import io.wisoft.prepair.prepair_api.dto.request.VideoInterviewRequest;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
+import io.wisoft.prepair.prepair_api.entity.InterviewSession;
 import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
@@ -12,6 +13,7 @@ import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.client.openai.dto.QuestionWithTags;
 import io.wisoft.prepair.prepair_api.prompt.PromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
+import io.wisoft.prepair.prepair_api.repository.SessionRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import java.util.UUID;
 public class QuestionService {
 
     private final QuestionRepository questionRepository;
+    private final SessionRepository sessionRepository;
     private final QuestionPersistService interviewQuestionService;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
@@ -66,11 +69,13 @@ public class QuestionService {
         String prompt = promptBuilder.buildVideoQuestionPrompt(member.job(), request.count());
         List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
 
+        InterviewSession session = sessionRepository.save(new InterviewSession(memberId, request.count()));
+
         List<InterviewQuestion> questions = results.stream()
-                .map(result -> interviewQuestionService.saveVideoQuestion(memberId, result))
+                .map(result -> interviewQuestionService.saveVideoQuestion(memberId, result, session))
                 .toList();
 
-        log.info("화상 면접 질문 생성 완료 - memberId: {}", memberId);
+        log.info("화상 면접 질문 생성 완료 - memberId: {}, sessionId: {}", memberId, session.getId());
         return questions;
     }
 }

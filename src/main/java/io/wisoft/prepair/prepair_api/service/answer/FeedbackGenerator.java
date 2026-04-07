@@ -2,7 +2,9 @@ package io.wisoft.prepair.prepair_api.service.answer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wisoft.prepair.prepair_api.dto.CombinedFeedbackResult;
 import io.wisoft.prepair.prepair_api.dto.FeedbackResult;
+import io.wisoft.prepair.prepair_api.dto.FinalFeedbackResult;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.global.client.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
@@ -33,6 +35,30 @@ public class FeedbackGenerator {
             return objectMapper.readValue(raw, FeedbackResult.class);
         } catch (JsonProcessingException e) {
             log.error("피드백 응답 파싱 실패: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
+        }
+    }
+
+    public CombinedFeedbackResult generateCombined(final String question, final String sttFeedback, final String videoFeedback) {
+        String prompt = promptBuilder.buildCombinedFeedbackPrompt(question, sttFeedback, videoFeedback);
+        String raw = openAiClient.generateText(prompt);
+
+        try {
+            return objectMapper.readValue(raw, CombinedFeedbackResult.class);
+        } catch (JsonProcessingException e) {
+            log.error("종합 피드백 응답 파싱 실패: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
+        }
+    }
+
+    public FinalFeedbackResult generateFinal(final String questionsAndFeedbacks) {
+        String prompt = promptBuilder.buildFinalFeedbackPrompt(questionsAndFeedbacks);
+        String raw = openAiClient.generateText(prompt);
+
+        try {
+            return objectMapper.readValue(raw, FinalFeedbackResult.class);
+        } catch (JsonProcessingException e) {
+            log.error("최종 평가 응답 파싱 실패: {}", e.getMessage());
             throw new BusinessException(ErrorCode.OPENAI_RESPONSE_PARSE_ERROR);
         }
     }
