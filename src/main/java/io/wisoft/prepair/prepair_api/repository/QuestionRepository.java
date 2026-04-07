@@ -15,4 +15,6 @@ public interface QuestionRepository extends JpaRepository<InterviewQuestion, UUI
     List<InterviewQuestion> findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(UUID memberId, QuestionType questionType);
 
     Optional<InterviewQuestion> findByIdAndMemberId(UUID id, UUID memberId);
+
+    List<InterviewQuestion> findByInterviewSessionId(UUID sessionId);
 }
