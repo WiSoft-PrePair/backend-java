@@ -46,7 +46,6 @@ public class AnalysisCompletionTracker {
         }
 
         int count = counter.incrementAndGet();
-        log.info("[TRACKER] 분석 완료 감지 - answerId: {}, 완료: {}/{}, 실패여부: {}", answerId, count, TOTAL_TASKS, failed);
 
         if (count == TOTAL_TASKS) {
             boolean hasFailed = failureMap.remove(answerId).get();

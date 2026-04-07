@@ -34,7 +34,6 @@ public class VideoAnswerAnalyzer {
 
     @Async("videoTaskExecutor")
     public void uploadToS3(final UUID answerId, final Path videoPath, final String contentType, final String email) {
-        log.info("[VIDEO-S3] 업로드 시작 - answerId: {}", answerId);
         try {
             String mediaUrl = fileUploader.upload(videoPath, contentType, email);
             answerPersistService.updateMediaUrl(answerId, mediaUrl);
@@ -49,7 +48,6 @@ public class VideoAnswerAnalyzer {
     @Async("videoTaskExecutor")
     public void analyzeSTT(final UUID answerId, final UUID questionId, final UUID memberId,
                            final Path videoPath, final String questionTags) {
-        log.info("[VIDEO-STT] 분석 시작 - answerId: {}", answerId);
         try {
             String answer = speechToTextService.convertToTextFromPath(videoPath, questionTags);
             answerPersistService.updateAnswer(answerId, answer);
@@ -71,7 +69,6 @@ public class VideoAnswerAnalyzer {
 
     @Async("videoTaskExecutor")
     public void analyzeVideo(final UUID answerId, final Path videoPath) {
-        log.info("[VIDEO-ANALYSIS] 분석 시작 - answerId: {}", answerId);
         try {
             FeedbackResult result = videoAnalysisService.analyze(videoPath);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());

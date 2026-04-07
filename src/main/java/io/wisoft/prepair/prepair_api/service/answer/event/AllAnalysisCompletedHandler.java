@@ -57,8 +57,6 @@ public class AllAnalysisCompletedHandler {
             return;
         }
 
-        log.info("[종합평가] 생성 시작 - answerId: {}", answerId);
-
         try {
             List<InterviewFeedback> feedbacks = feedbackRepository.findByInterviewAnswerId(answerId);
 
@@ -112,8 +110,6 @@ public class AllAnalysisCompletedHandler {
             log.info("[최종평가] 아직 모든 질문 완료되지 않음 - sessionId: {}, {}/{}", sessionId, combinedCount, session.getTotalQuestionCount());
             return;
         }
-
-        log.info("[최종평가] 생성 시작 - sessionId: {}", sessionId);
 
         List<InterviewQuestion> questions = questionRepository.findByInterviewSessionId(sessionId);
 
@@ -179,7 +175,6 @@ public class AllAnalysisCompletedHandler {
         if (videoPath == null) return;
         try {
             Files.deleteIfExists(videoPath);
-            log.info("[임시파일] 삭제 완료 - path: {}", videoPath);
         } catch (IOException e) {
             log.warn("[임시파일] 삭제 실패 - path: {}", videoPath, e);
         }
