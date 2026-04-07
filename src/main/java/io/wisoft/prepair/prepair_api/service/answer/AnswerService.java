@@ -56,7 +56,6 @@ public class AnswerService {
         String email = memberServiceClient.getMember(memberId).email();
         InterviewAnswer answer = answerPersistService.createVideoAnswer(questionId, memberId);
 
-        log.info("[VIDEO] 영상 답변 처리 시작 - questionId: {}, memberId: {}", questionId, memberId);
         Path videoPath = createTempFile(video);
 
         completionTracker.init(answer.getId(), videoPath);
@@ -64,7 +63,6 @@ public class AnswerService {
         videoAnswerAnalyzer.uploadToS3(answer.getId(), videoPath, video.getContentType(), email);
         videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath, question.getQuestionTag());
         videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
-        log.info("[VIDEO] 비동기 작업 위임 완료 - answerId: {}", answer.getId());
     }
 
     private Path createTempFile(MultipartFile video) {
