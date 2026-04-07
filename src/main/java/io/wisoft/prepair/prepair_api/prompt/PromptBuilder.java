@@ -115,4 +115,46 @@ public class PromptBuilder {
                 답변: %s
                 """.formatted(questionTag, question, answer);
     }
+
+    public String buildCombinedFeedbackPrompt(String question, String sttFeedback, String videoFeedback) {
+        return """
+                너는 면접 평가 전문가야. 아래 면접 질문에 대한 음성 분석(STT) 피드백과 영상 분석(Video) 피드백을 종합하여 한 줄 종합 평가를 작성해줘.
+
+                규칙:
+                1. 음성 분석과 영상 분석의 내용을 모두 고려하여 종합적으로 평가해줘.
+                2. combineFeedback: 한 줄로 종합 평가를 작성해줘.
+                3. score: 0~100 사이 정수로 종합 점수를 매겨줘.
+                4. 반드시 아래 JSON 형식으로만 응답하고, 마크다운(```json 등)은 포함하지 마.
+                    {
+                      "combineFeedback": "한 줄 종합 평가",
+                      "score": 85
+                    }
+
+                면접 질문: %s
+
+                음성 분석 피드백:
+                %s
+
+                영상 분석 피드백:
+                %s
+                """.formatted(question, sttFeedback, videoFeedback);
+    }
+
+    public String buildFinalFeedbackPrompt(String questionsAndFeedbacks) {
+        return """
+                너는 면접 평가 전문가야. 아래는 한 면접 세션에서 진행된 모든 질문과 각 질문에 대한 종합 평가 결과야.
+                이를 바탕으로 면접자의 전체적인 면접 수행에 대한 최종 평가 요약을 작성해줘.
+
+                규칙:
+                1. 전체 질문에 대한 답변 경향, 강점, 약점을 종합적으로 분석해줘.
+                2. finalFeedback: 2-3문장으로 최종 평가 요약을 작성해줘.
+                3. 반드시 아래 JSON 형식으로만 응답하고, 마크다운(```json 등)은 포함하지 마.
+                    {
+                      "finalFeedback": "최종 평가 요약"
+                    }
+
+                면접 질문 및 종합 평가 결과:
+                %s
+                """.formatted(questionsAndFeedbacks);
+    }
 }

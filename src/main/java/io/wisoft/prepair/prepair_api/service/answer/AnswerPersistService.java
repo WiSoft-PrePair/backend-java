@@ -2,6 +2,7 @@ package io.wisoft.prepair.prepair_api.service.answer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wisoft.prepair.prepair_api.dto.CombinedFeedbackResult;
 import io.wisoft.prepair.prepair_api.dto.FeedbackResult;
 import io.wisoft.prepair.prepair_api.dto.response.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.entity.InterviewAnswer;
@@ -92,6 +93,15 @@ public class AnswerPersistService {
 
         feedbackRepository.save(
                 new InterviewFeedback(interviewAnswer, serializeFeedback(detail), feedbackType, result.score()));
+    }
+
+    @Transactional
+    public void saveCombinedFeedback(final UUID answerId, final CombinedFeedbackResult result) {
+        InterviewAnswer interviewAnswer = answerRepository.findById(answerId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ANSWER_NOT_FOUND));
+
+        feedbackRepository.save(
+                new InterviewFeedback(interviewAnswer, result.combineFeedback(), FeedbackType.COMBINED, result.score()));
     }
 
     private InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
