@@ -56,18 +56,24 @@ public class InterviewQuestion extends BaseTimeEntity {
     @JoinColumn(name = "job_posting_id")
     private JobPosting jobPosting;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id")
+    private InterviewSession interviewSession;
+
     public InterviewQuestion(
             final UUID memberId,
             final String question,
             final QuestionType questionType,
             final String questionTag,
-            final JobPosting jobPosting
+            final JobPosting jobPosting,
+            final InterviewSession interviewSession
     ) {
         this.memberId = memberId;
         this.question = question;
         this.questionType = questionType;
         this.questionTag = questionTag;
         this.jobPosting = jobPosting;
+        this.interviewSession = interviewSession;
     }
 
     public void updateStatus(final QuestionStatus status) {
