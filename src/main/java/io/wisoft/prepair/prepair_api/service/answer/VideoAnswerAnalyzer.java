@@ -7,6 +7,7 @@ import io.wisoft.prepair.prepair_api.entity.enums.FeedbackType;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
+import io.wisoft.prepair.prepair_api.service.answer.event.AnalysisCompletionTracker;
 import io.wisoft.prepair.prepair_api.service.stt.SpeechToTextService;
 import io.wisoft.prepair.prepair_api.service.vidoe.VideoAnalysisService;
 import io.wisoft.prepair.prepair_api.storage.FileUploader;
@@ -29,6 +30,7 @@ public class VideoAnswerAnalyzer {
     private final QuestionRepository questionRepository;
     private final FileUploader fileUploader;
     private final FeedbackGenerator feedbackGenerator;
+    private final AnalysisCompletionTracker completionTracker;
 
     @Async("videoTaskExecutor")
     public void uploadToS3(final UUID answerId, final Path videoPath, final String contentType, final String email) {
@@ -37,8 +39,10 @@ public class VideoAnswerAnalyzer {
             String mediaUrl = fileUploader.upload(videoPath, contentType, email);
             answerPersistService.updateMediaUrl(answerId, mediaUrl);
             log.info("[VIDEO-S3] 업로드 완료 - answerId: {}", answerId);
+            completionTracker.complete(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-S3] 업로드 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            completionTracker.fail(answerId);
         }
     }
 
@@ -58,8 +62,10 @@ public class VideoAnswerAnalyzer {
 
             answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.STT);
             log.info("[VIDEO-STT] 분석 완료 - answerId: {}", answerId);
+            completionTracker.complete(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-STT] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            completionTracker.fail(answerId);
         }
     }
 
@@ -72,8 +78,10 @@ public class VideoAnswerAnalyzer {
 
             answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
             log.info("[VIDEO-ANALYSIS] 분석 완료 - answerId: {}", answerId);
+            completionTracker.complete(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-ANALYSIS] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
+            completionTracker.fail(answerId);
         }
     }
 }
