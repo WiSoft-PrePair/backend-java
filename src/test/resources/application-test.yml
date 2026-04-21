@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/interview_test
+    username: test
+    password: test
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: test@test.com
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+external:
+  member-service:
+    url: http://localhost:3000
+    api-key: test-api-key
+
+  openai:
+    api-key: test-openai-key
+    api-url: https://api.openai.com/v1/chat/completions
+    model: gpt-4o-mini
+    whisper-url: https://api.openai.com/v1/audio/transcriptions
+    whisper-model: whisper-1
+
+cloud:
+  aws:
+    s3:
+      endpoint: http://localhost:9000
+      access-key: test-access-key
+      secret-key: test-secret-key
+      region: us-east-1
+      bucket: prepair
+      presigned-url-expiration: 3600
