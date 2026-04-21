@@ -25,12 +25,16 @@ FROM mcr.microsoft.com/playwright/java:v1.49.0-noble
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ffmpeg curl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # 포트 문서화
 EXPOSE 7300
+
+# 컨테이너 레벨 헬스체크 (Docker daemon의 status 표시용)
+HEALTHCHECK --interval=24h --timeout=10s --start-period=40s --retries=3 \
+  CMD curl -sf http://localhost:7300/health || exit 1
 
 # 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
