@@ -31,7 +31,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prev
     container_name: interview-api
     ports:
       - "7300:7300"
