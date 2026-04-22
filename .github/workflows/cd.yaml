@@ -39,13 +39,7 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          echo "JUMP_HOST=$JUMP_HOST"
-          echo "JUMP_PORT=$JUMP_PORT"
-          echo "JUMP_USER=$JUMP_USER"
-          echo "TARGET_HOST=$TARGET_HOST"
-          echo "TARGET_USER=$TARGET_USER"
-          echo "DEPLOY_PATH=$DEPLOY_PATH"
-          ssh -o StrictHostKeyChecking=no -J "${JUMP_USER}@${JUMP_HOST}:${JUMP_PORT}" "${TARGET_USER}@${TARGET_HOST}" /bin/bash << ENDSSH
+          ssh -v -o StrictHostKeyChecking=no -J "${JUMP_USER}@${JUMP_HOST}:${JUMP_PORT}" "${TARGET_USER}@${TARGET_HOST}" /bin/bash << ENDSSH
             set -e
 
             echo "=== 배포 디렉토리 이동 ==="
