@@ -39,35 +39,7 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
-          ssh -v -o StrictHostKeyChecking=no -o ProxyJump=$JUMP_USER@$JUMP_HOST:$JUMP_PORT $TARGET_USER@$TARGET_HOST /bin/bash << ENDSSH
-            set -e
-
-            echo "=== 배포 디렉토리 이동 ==="
-            cd $DEPLOY_PATH
-
-            echo "=== GHCR 로그인 ==="
-            echo "$GHCR_PAT" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-
-            echo "=== 최신 이미지 Pull ==="
-            docker compose -f docker/docker-compose.prod.yml --env-file .env pull app
-
-            echo "=== 앱 컨테이너 재시작 ==="
-            docker compose -f docker/docker-compose.prod.yml --env-file .env up -d app
-
-            echo "=== Health Check (최대 60초) ==="
-            for i in \$(seq 1 12); do
-              if curl -sf http://localhost:7300/actuator/health > /dev/null; then
-                echo "Health check 통과"
-                exit 0
-              fi
-              echo "재시도 \$i/12"
-              sleep 5
-            done
-
-            echo "Health check 실패"
-            docker compose -f docker/docker-compose.prod.yml logs --tail=50 app
-            exit 1
-          ENDSSH
+          ssh -v -o StrictHostKeyChecking=no -o ProxyJump=$JUMP_USER@$JUMP_HOST:$JUMP_PORT $TARGET_USER@$TARGET_HOST echo "SSH 연결 성공"
 
       - name: 오래된 Docker 이미지 정리
         if: success()
