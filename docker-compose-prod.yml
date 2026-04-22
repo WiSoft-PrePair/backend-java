@@ -3,8 +3,8 @@ services:
     image: fluent/fluent-bit:3.2
     container_name: interview-fluent-bit
     volumes:
-      - ./fluentbit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-      - ./fluentbit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
+      - ./docker/fluent-bit/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./docker/fluent-bit/parsers.conf:/fluent-bit/etc/parsers.conf:ro
     ports:
       - "24224:24224"
     environment:
