@@ -39,6 +39,11 @@ jobs:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: |
+          echo "JUMP_USER length: ${#JUMP_USER}"
+          echo "JUMP_HOST length: ${#JUMP_HOST}"
+          echo "JUMP_PORT length: ${#JUMP_PORT}"
+          echo "TARGET_USER length: ${#TARGET_USER}"
+          echo "TARGET_HOST length: ${#TARGET_HOST}"
           ssh -v -o StrictHostKeyChecking=no -o ProxyJump=$JUMP_USER@$JUMP_HOST:$JUMP_PORT $TARGET_USER@$TARGET_HOST echo "SSH 연결 성공"
 
       - name: 오래된 Docker 이미지 정리
