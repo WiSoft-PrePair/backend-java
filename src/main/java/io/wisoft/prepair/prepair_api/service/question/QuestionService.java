@@ -78,4 +78,10 @@ public class QuestionService {
         log.info("화상 면접 질문 생성 완료 - memberId: {}, sessionId: {}", memberId, session.getId());
         return questions;
     }
+
+    public void validateSessionOwner(UUID sessionId, UUID memberId) {
+        if(!sessionRepository.existsByIdAndMemberId(sessionId, memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+    }
 }

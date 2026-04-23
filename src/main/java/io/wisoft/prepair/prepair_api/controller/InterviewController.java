@@ -91,8 +91,11 @@ public class InterviewController {
     }
 
     @GetMapping(value = "/questions/video-answers/{sessionId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter subscribeSession(@PathVariable UUID sessionId) {
+    public SseEmitter subscribeSession(
+            @PathVariable UUID sessionId,
+            @RequestHeader("X-User-Id") UUID memberId
+    ) {
+        questionService.validateSessionOwner(sessionId, memberId);
         return sseEmitterManager.create(sessionId);
     }
 }
-
