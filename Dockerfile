@@ -34,7 +34,7 @@ EXPOSE 7300
 
 # 컨테이너 레벨 헬스체크 (Docker daemon의 status 표시용)
 HEALTHCHECK --interval=24h --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -sf http://localhost:7300/health || exit 1
+  CMD curl -sf http://localhost:7300/actuator/health || exit 1
 
 # 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
