@@ -66,10 +66,12 @@ public class QuestionService {
 
     public List<InterviewQuestion> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
         MemberSchedulerInfo member = memberServiceClient.getMember(memberId);
+
         String prompt = promptBuilder.buildVideoQuestionPrompt(member.job(), request.count());
+
         List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
 
-        InterviewSession session = sessionRepository.save(new InterviewSession(memberId, request.count()));
+        InterviewSession session = sessionRepository.save(new InterviewSession(memberId, results.size()));
 
         List<InterviewQuestion> questions = results.stream()
                 .map(result -> interviewQuestionService.saveVideoQuestion(memberId, result, session))
