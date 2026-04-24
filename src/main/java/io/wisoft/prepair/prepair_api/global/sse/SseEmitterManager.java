@@ -16,6 +16,11 @@ public class SseEmitterManager {
     private final ConcurrentMap<UUID, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter create(UUID id) {
+        SseEmitter existing = emitters.remove(id);
+        if (existing != null) {
+            existing.complete();
+        }
+
         SseEmitter emitter = new SseEmitter(TIMEOUT);
         emitters.put(id, emitter);
 
@@ -36,7 +41,7 @@ public class SseEmitterManager {
                     .data(data));
         } catch (IOException e) {
             log.error("[SSE] 전송 실패 - id: {}", id, e);
-            emitters.remove(id);
+            complete(id);
         }
     }
 
