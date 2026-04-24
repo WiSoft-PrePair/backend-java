@@ -183,9 +183,12 @@ public class AllAnalysisCompletedHandler {
     private void sendFailureToSession(UUID answerId, String message) {
         InterviewAnswer answer = answerRepository.findByIdWithQuestionAndSession(answerId).orElse(null);
         if (answer != null && answer.getInterviewQuestion().getInterviewSession() != null) {
-            UUID sessionId = answer.getInterviewQuestion().getInterviewSession().getId();
-            sseEmitterManager.send(sessionId, "analysis-failed", Map.of("message", message));
-            sseEmitterManager.complete(sessionId);
+            InterviewSession session = answer.getInterviewQuestion().getInterviewSession();
+            session.fail();
+            sessionRepository.save(session);
+
+            sseEmitterManager.send(session.getId(), "analysis-failed", Map.of("message", message));
+            sseEmitterManager.complete(session.getId());
         }
     }
 }

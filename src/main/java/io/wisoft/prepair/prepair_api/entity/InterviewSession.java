@@ -46,4 +46,8 @@ public class InterviewSession extends BaseTimeEntity {
         this.finalFeedback = finalFeedback;
         this.status = SessionStatus.COMPLETED;
     }
+
+    public void fail() {
+        this.status = SessionStatus.FAILED;
+    }
 }
