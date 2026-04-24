@@ -80,7 +80,9 @@ public class QuestionService {
     }
 
     public void validateSessionOwner(UUID sessionId, UUID memberId) {
-        if(!sessionRepository.existsByIdAndMemberId(sessionId, memberId)) {
+        InterviewSession session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SESSION_NOT_FOUND));
+        if (!session.getMemberId().equals(memberId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
     }
