@@ -1,9 +1,11 @@
 package io.wisoft.prepair.prepair_api.service.question;
 
+import io.wisoft.prepair.prepair_api.dto.request.JobPostingRequest;
 import io.wisoft.prepair.prepair_api.dto.request.VideoInterviewRequest;
+import io.wisoft.prepair.prepair_api.dto.response.CompanyQuestionResponse;
+import io.wisoft.prepair.prepair_api.dto.response.QuestionResponse;
 import io.wisoft.prepair.prepair_api.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.entity.InterviewSession;
-import io.wisoft.prepair.prepair_api.entity.JobPosting;
 import io.wisoft.prepair.prepair_api.entity.enums.QuestionType;
 import io.wisoft.prepair.prepair_api.global.client.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.global.exception.BusinessException;
@@ -15,6 +17,7 @@ import io.wisoft.prepair.prepair_api.prompt.PromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.repository.SessionRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,17 +40,22 @@ public class QuestionService {
     private final PromptBuilder promptBuilder;
 
     @Transactional(readOnly = true)
-    public List<InterviewQuestion> getQuestions(UUID memberId, QuestionType type) {
-        return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type);
+    public List<QuestionResponse> getQuestions(UUID memberId, QuestionType type) {
+        return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type)
+                .stream()
+                .map(QuestionResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
-    public InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
-        return questionRepository.findByIdAndMemberId(questionId, memberId)
+    public QuestionResponse getQuestion(UUID questionId, UUID memberId) {
+        InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        return QuestionResponse.from(question);
     }
 
-    public List<InterviewQuestion> generateCompanyQuestions(UUID memberId, JobPosting jobPosting) {
+    public CompanyQuestionResponse generateCompanyQuestions(UUID memberId, JobPostingRequest jobPosting) {
         try {
             final String prompt = promptBuilder.buildCompanyQuestionPrompt(jobPosting.getContent());
             final List<QuestionWithTags> results = openAiClient.generateQuestions(prompt);
@@ -64,7 +72,7 @@ public class QuestionService {
         }
     }
 
-    public List<InterviewQuestion> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
+    public List<QuestionResponse> generateVideoQuestions(UUID memberId, VideoInterviewRequest request) {
         MemberSchedulerInfo member = memberServiceClient.getMember(memberId);
 
         String prompt = promptBuilder.buildVideoQuestionPrompt(member.job(), request.count());
@@ -78,7 +86,9 @@ public class QuestionService {
                 .toList();
 
         log.info("화상 면접 질문 생성 완료 - memberId: {}, sessionId: {}", memberId, session.getId());
-        return questions;
+        return questions.stream()
+                        .map(QuestionResponse::from)
+                        .toList();
     }
 
     public void validateSessionOwner(UUID sessionId, UUID memberId) {
