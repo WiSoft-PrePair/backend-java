@@ -46,14 +46,13 @@ public class VideoAnswerAnalyzer {
     }
 
     @Async("videoTaskExecutor")
-    public void analyzeSTT(final UUID answerId, final UUID questionId, final UUID memberId,
-                           final Path videoPath, final String questionTags) {
+    public void analyzeSTT(final UUID answerId, final UUID questionId, final UUID memberId, final Path videoPath) {
         try {
-            String answer = speechToTextService.convertToTextFromPath(videoPath, questionTags);
-            answerPersistenceService.updateAnswer(answerId, answer);
-
             InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+            String answer = speechToTextService.convertToTextFromPath(videoPath, question.getQuestionTag());
+            answerPersistenceService.updateAnswer(answerId, answer);
 
             FeedbackResult result = feedbackGenerator.generate(question, answer);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());

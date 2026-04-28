@@ -4,6 +4,7 @@ import io.wisoft.prepair.prepair_api.dto.request.AnswerRequest;
 import io.wisoft.prepair.prepair_api.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.global.common.ApiResponse;
 import io.wisoft.prepair.prepair_api.service.answer.AnswerService;
+import io.wisoft.prepair.prepair_api.service.answer.VideoAnswerStreamService;
 import jakarta.validation.Valid;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class AnswerController {
 
     private final AnswerService answerService;
+    private final VideoAnswerStreamService videoAnswerStreamService;
 
     @PostMapping("/{questionId}/answers")
     @ResponseStatus(HttpStatus.CREATED)
@@ -49,6 +51,6 @@ public class AnswerController {
             @PathVariable UUID sessionId,
             @RequestHeader("X-User-Id") UUID memberId
     ) {
-        return answerService.subscribeSession(sessionId, memberId);
+        return videoAnswerStreamService.subscribe(sessionId, memberId);
     }
 }
