@@ -10,7 +10,7 @@ import io.wisoft.prepair.prepair_api.notification.email.EmailService;
 import io.wisoft.prepair.prepair_api.notification.kakao.KakaoService;
 import io.wisoft.prepair.prepair_api.prompt.PromptBuilder;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
-import io.wisoft.prepair.prepair_api.service.question.QuestionPersistService;
+import io.wisoft.prepair.prepair_api.service.question.QuestionPersistenceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ import java.util.List;
 public class TodayQuestionService {
 
     private final QuestionRepository questionRepository;
-    private final QuestionPersistService interviewQuestionService;
+    private final QuestionPersistenceService interviewQuestionService;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
     private final PromptBuilder promptBuilder;

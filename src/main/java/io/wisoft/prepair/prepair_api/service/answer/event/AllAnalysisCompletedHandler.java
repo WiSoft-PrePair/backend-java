@@ -15,7 +15,7 @@ import io.wisoft.prepair.prepair_api.repository.AnswerRepository;
 import io.wisoft.prepair.prepair_api.repository.FeedbackRepository;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.repository.SessionRepository;
-import io.wisoft.prepair.prepair_api.service.answer.AnswerPersistService;
+import io.wisoft.prepair.prepair_api.service.answer.AnswerPersistenceService;
 import io.wisoft.prepair.prepair_api.service.answer.FeedbackGenerator;
 import io.wisoft.prepair.prepair_api.global.sse.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class AllAnalysisCompletedHandler {
 
     private final FeedbackRepository feedbackRepository;
     private final FeedbackGenerator feedbackGenerator;
-    private final AnswerPersistService answerPersistService;
+    private final AnswerPersistenceService answerPersistenceService;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
     private final SessionRepository sessionRepository;
@@ -86,7 +86,7 @@ public class AllAnalysisCompletedHandler {
                     videoFeedback.getFeedback()
             );
 
-            answerPersistService.saveCombinedFeedback(answerId, result);
+            answerPersistenceService.saveCombinedFeedback(answerId, result);
             log.info("[종합평가] 완료 - answerId: {}, score: {}", answerId, result.score());
 
             checkAndGenerateFinal(answer);

@@ -79,14 +79,4 @@ public class InterviewQuestion extends BaseTimeEntity {
     public void updateStatus(final QuestionStatus status) {
         this.status = status;
     }
-
-    public void updateLatestScore(final Integer score) {
-        this.latestScore = score;
-    }
-
-    public boolean isTodayQuestionFirstAnswer() {
-        return questionType == QuestionType.TEXT
-                && getCreatedAt().toLocalDate().equals(LocalDate.now())
-                && latestScore == null;
-    }
 }

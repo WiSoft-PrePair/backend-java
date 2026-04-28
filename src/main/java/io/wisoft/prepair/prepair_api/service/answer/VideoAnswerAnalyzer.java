@@ -9,7 +9,7 @@ import io.wisoft.prepair.prepair_api.global.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.service.answer.event.AnalysisCompletionTracker;
 import io.wisoft.prepair.prepair_api.service.stt.SpeechToTextService;
-import io.wisoft.prepair.prepair_api.service.vidoe.VideoAnalysisService;
+import io.wisoft.prepair.prepair_api.service.video.VideoAnalysisService;
 import io.wisoft.prepair.prepair_api.storage.FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class VideoAnswerAnalyzer {
 
-    private final AnswerPersistService answerPersistService;
+    private final AnswerPersistenceService answerPersistenceService;
     private final SpeechToTextService speechToTextService;
     private final VideoAnalysisService videoAnalysisService;
     private final QuestionRepository questionRepository;
@@ -36,7 +36,7 @@ public class VideoAnswerAnalyzer {
     public void uploadToS3(final UUID answerId, final Path videoPath, final String contentType, final String email) {
         try {
             String mediaUrl = fileUploader.upload(videoPath, contentType, email);
-            answerPersistService.updateMediaUrl(answerId, mediaUrl);
+            answerPersistenceService.updateMediaUrl(answerId, mediaUrl);
             log.info("[VIDEO-S3] 업로드 완료 - answerId: {}", answerId);
             completionTracker.complete(answerId);
         } catch (Exception e) {
@@ -50,7 +50,7 @@ public class VideoAnswerAnalyzer {
                            final Path videoPath, final String questionTags) {
         try {
             String answer = speechToTextService.convertToTextFromPath(videoPath, questionTags);
-            answerPersistService.updateAnswer(answerId, answer);
+            answerPersistenceService.updateAnswer(answerId, answer);
 
             InterviewQuestion question = questionRepository.findByIdAndMemberId(questionId, memberId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
@@ -58,7 +58,7 @@ public class VideoAnswerAnalyzer {
             FeedbackResult result = feedbackGenerator.generate(question, answer);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
-            answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.STT);
+            answerPersistenceService.saveFeedback(answerId, result, detail, FeedbackType.STT);
             log.info("[VIDEO-STT] 분석 완료 - answerId: {}", answerId);
             completionTracker.complete(answerId);
         } catch (Exception e) {
@@ -73,7 +73,7 @@ public class VideoAnswerAnalyzer {
             FeedbackResult result = videoAnalysisService.analyze(videoPath);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
-            answerPersistService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
+            answerPersistenceService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
             log.info("[VIDEO-ANALYSIS] 분석 완료 - answerId: {}", answerId);
             completionTracker.complete(answerId);
         } catch (Exception e) {
