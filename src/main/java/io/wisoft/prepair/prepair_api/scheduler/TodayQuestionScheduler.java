@@ -1,5 +1,6 @@
 package io.wisoft.prepair.prepair_api.scheduler;
 
+import io.wisoft.prepair.prepair_api.interview.question.service.DailyQuestionGenerationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -14,16 +15,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TodayQuestionScheduler {
 
-    private final TodayQuestionService todayQuestionService;
+    private final DailyQuestionGenerationService dailyQuestionGenerationService;
 
     @Scheduled(cron = "0 0 9 * * *")
-//    @Scheduled(cron = "0 */5 * * * *")
     public void generateTodayQuestions() {
         String correlationId = "SCHEDULER-" + UUID.randomUUID().toString();
         MDC.put("correlationId", correlationId);
         try {
             log.info("오늘의 질문 생성 스케줄러 시작 - {}", LocalDateTime.now());
-            todayQuestionService.generateTodayQuestions();
+            dailyQuestionGenerationService.generateTodayQuestions();
             log.info("오늘의 질문 생성 스케줄러 종료");
         } finally {
             MDC.remove("correlationId");
