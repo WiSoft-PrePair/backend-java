@@ -58,7 +58,7 @@ public class AnswerService {
 
         // 임시 파일 먼저 생성 후 DB 저장 (실패 시 고아 레코드 방지)
         Path videoPath = createTempFile(video);
-        InterviewAnswer answer = answerPersistenceService.createVideoAnswer(questionId, memberId);
+        InterviewAnswer answer = answerPersistenceService.saveVideoAnswer(questionId, memberId);
 
         // 3개 비동기 작업 모두 완료 시 이벤트 발행을 위한 트래커 초기화
         completionTracker.init(answer.getId(), videoPath);

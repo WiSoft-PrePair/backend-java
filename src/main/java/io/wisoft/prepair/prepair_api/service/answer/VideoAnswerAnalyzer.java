@@ -57,7 +57,7 @@ public class VideoAnswerAnalyzer {
             FeedbackResult result = feedbackGenerator.generate(question, answer);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
-            answerPersistenceService.saveFeedback(answerId, result, detail, FeedbackType.STT);
+            answerPersistenceService.saveVideoFeedback(answerId, result, detail, FeedbackType.STT);
             log.info("[VIDEO-STT] 분석 완료 - answerId: {}", answerId);
             completionTracker.complete(answerId);
         } catch (Exception e) {
@@ -72,7 +72,7 @@ public class VideoAnswerAnalyzer {
             FeedbackResult result = videoAnalysisService.analyze(videoPath);
             FeedbackDetail detail = new FeedbackDetail(result.good(), result.improvement(), result.recommendation());
 
-            answerPersistenceService.saveFeedback(answerId, result, detail, FeedbackType.VIDEO);
+            answerPersistenceService.saveVideoFeedback(answerId, result, detail, FeedbackType.VIDEO);
             log.info("[VIDEO-ANALYSIS] 분석 완료 - answerId: {}", answerId);
             completionTracker.complete(answerId);
         } catch (Exception e) {
