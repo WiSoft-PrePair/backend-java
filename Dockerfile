@@ -5,16 +5,13 @@ FROM eclipse-temurin:21 AS builder
 
 WORKDIR /app
 
-# Gradle 캐싱을 위해 설정 파일 먼저 복사
 COPY gradlew .
 COPY gradle gradle
-COPY build.gradle .
 COPY settings.gradle .
+COPY build.gradle .
 
-# 의존성 다운로드 (캐싱 레이어)
 RUN ./gradlew dependencies --no-daemon
 
-# 소스코드 복사 후 빌드
 COPY src src
 RUN ./gradlew build -x test --no-daemon
 
@@ -29,12 +26,9 @@ RUN apt-get update && apt-get install -y ffmpeg curl && rm -rf /var/lib/apt/list
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# 포트 문서화
 EXPOSE 7300
 
-# 컨테이너 레벨 헬스체크 (Docker daemon의 status 표시용)
-HEALTHCHECK --interval=24h --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -sf http://localhost:7300/actuator/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -sf http://localhost:7300/actuator/health
 
-# 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
