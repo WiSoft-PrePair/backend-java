@@ -75,6 +75,9 @@ jobs:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
 
+      - name: QEMU 설정
+        uses: docker/setup-qemu-action@v3
+
       - name: Docker Buildx 설정
         uses: docker/setup-buildx-action@v3
 

@@ -9,7 +9,7 @@ logging:
 
 spring:
   application:
-    name: interview-service
+    name: prepair-backend-java-api
 
   profiles:
     active: local

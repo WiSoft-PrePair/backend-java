@@ -39,7 +39,7 @@ id_rsa*
 Dockerfile
 .dockerignore
 docker/
-docker-compose*.yml
+docker-compose.yaml
 compose*.yaml
 compose*.yml
 
