@@ -1,6 +1,64 @@
+# VCS
 .git
-.gradle
+.gitignore
+.gitattributes
+.github/
+
+# Gradle 로컬 캐시 / 빌드 산출물 (컨테이너 안에서 다시 생성되므로 불필요)
+.gradle/
 build/
-*.md
+out/
+bin/
+HELP.md
+
+# IDE / OS 자동 생성 파일
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.springBeans
+.sts4-cache
+.apt_generated
+.factorypath
+*.iml
+*.iws
+*.ipr
+**/.DS_Store
+Thumbs.db
+
+# 환경변수 / 시크릿
 .env
-.idea
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+
+# Docker / Compose 정의 (이미지 안에서 안 씀)
+Dockerfile
+.dockerignore
+docker/
+docker-compose.yaml
+compose*.yaml
+compose*.yml
+
+# 배포 인프라 정의 (fluent-bit 설정 등)
+deploy/
+
+# 문서
+*.md
+LICENSE
+docs/
+CLAUDE.md
+
+# 테스트 코드 (Dockerfile이 `gradlew build -x test`로 스킵하므로 제외)
+src/test/
+
+# 로컬 실행 흔적 (데이터/로그)
+postgres-data/
+logs/
+*.log
+
+# Windows 전용 스크립트 (리눅스 컨테이너 무관)
+gradlew.bat
