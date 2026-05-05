@@ -13,14 +13,13 @@ import io.wisoft.prepair.prepair_api.interview.answer.service.FeedbackGenerator;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.interview.session.entity.InterviewSession;
-import io.wisoft.prepair.prepair_api.interview.session.repository.SessionRepository;
+import io.wisoft.prepair.prepair_api.interview.session.service.SessionPersistenceService;
 import io.wisoft.prepair.prepair_api.common.support.SseEmitterManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,12 +41,11 @@ public class AllAnalysisCompletedHandler {
     private final AnswerPersistenceService answerPersistenceService;
     private final AnswerRepository answerRepository;
     private final QuestionRepository questionRepository;
-    private final SessionRepository sessionRepository;
+    private final SessionPersistenceService sessionPersistenceService;
     private final SseEmitterManager sseEmitterManager;
 
     @Async("videoTaskExecutor")
     @EventListener
-    @Transactional
     public void handle(AllAnalysisCompletedEvent event) {
         UUID answerId = event.answerId();
         deleteTempFile(event.videoPath());
@@ -201,8 +199,7 @@ public class AllAnalysisCompletedHandler {
     private void completeSession(InterviewSession session, FinalFeedbackData data, FinalFeedbackResult finalResult) {
         UUID sessionId = session.getId();
 
-        session.complete(data.finalScore(), finalResult.finalFeedback());
-        sessionRepository.save(session);
+        sessionPersistenceService.saveCompletedSession(session, data.finalScore(), finalResult.finalFeedback());
 
         FinalFeedbackResponse response = new FinalFeedbackResponse(
                 sessionId,
@@ -222,8 +219,7 @@ public class AllAnalysisCompletedHandler {
         if (answer == null || answer.getInterviewQuestion().getInterviewSession() == null) return;
 
         InterviewSession session = answer.getInterviewQuestion().getInterviewSession();
-        session.fail();
-        sessionRepository.save(session);
+        sessionPersistenceService.saveFailedSession(session);
 
         sseEmitterManager.send(session.getId(), "analysis-failed", Map.of("message", message));
         sseEmitterManager.complete(session.getId());
