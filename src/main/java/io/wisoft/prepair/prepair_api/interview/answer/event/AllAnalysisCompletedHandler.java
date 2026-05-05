@@ -199,7 +199,7 @@ public class AllAnalysisCompletedHandler {
     private void completeSession(InterviewSession session, FinalFeedbackData data, FinalFeedbackResult finalResult) {
         UUID sessionId = session.getId();
 
-        sessionPersistenceService.saveCompletedSession(session, data.finalScore(), finalResult.finalFeedback());
+        sessionPersistenceService.saveCompletedSession(sessionId, data.finalScore(), finalResult.finalFeedback());
 
         FinalFeedbackResponse response = new FinalFeedbackResponse(
                 sessionId,
@@ -219,7 +219,7 @@ public class AllAnalysisCompletedHandler {
         if (answer == null || answer.getInterviewQuestion().getInterviewSession() == null) return;
 
         InterviewSession session = answer.getInterviewQuestion().getInterviewSession();
-        sessionPersistenceService.saveFailedSession(session);
+        sessionPersistenceService.saveFailedSession(session.getId());
 
         sseEmitterManager.send(session.getId(), "analysis-failed", Map.of("message", message));
         sseEmitterManager.complete(session.getId());
