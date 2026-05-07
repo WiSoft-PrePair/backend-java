@@ -17,13 +17,13 @@ public class TodayQuestionScheduler {
 
     private final TodayQuestionService todayQuestionService;
 
-    @Scheduled(cron = "0 0 9 * * *")
+    @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void generateTodayQuestions() {
         String correlationId = "SCHEDULER-" + UUID.randomUUID().toString();
         MDC.put("correlationId", correlationId);
         try {
             log.info("오늘의 질문 생성 스케줄러 시작 - {}", LocalDateTime.now());
-            todayQuestionService.generateTodayQuestions();
+            todayQuestionService.sendTodayQuestions();
             log.info("오늘의 질문 생성 스케줄러 종료");
         } finally {
             MDC.remove("correlationId");

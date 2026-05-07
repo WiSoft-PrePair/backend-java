@@ -21,14 +21,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TodayQuestionService {
 
-    private final QuestionPersistenceService interviewQuestionService;
+    private final QuestionPersistenceService questionPersistenceService;
     private final QuestionNotificationService questionNotificationService;
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
     private final PromptBuilder promptBuilder;
 
-    public void generateTodayQuestions() {
+    public void sendTodayQuestions() {
         List<MemberSchedulerInfo> members = memberServiceClient.getMembers();
         DayOfWeek today = LocalDate.now(ZoneId.of("Asia/Seoul")).getDayOfWeek();
 
@@ -40,39 +40,23 @@ public class TodayQuestionService {
                 .toList();
 
         log.info("질문 생성 대상: {} / {} 명", targetMembers.size(), members.size());
-        targetMembers.forEach(this::processTodayQuestion);
+        targetMembers.forEach(this::generateAndSend);
     }
 
-    private void processTodayQuestion(MemberSchedulerInfo member) {
+    private void generateAndSend(MemberSchedulerInfo member) {
         try {
             List<InterviewQuestion> previousQuestions = questionRepository.findByMemberId(member.id());
             String prompt = promptBuilder.buildDailyQuestionPrompt(member.job(), previousQuestions);
             QuestionWithTags result = openAiClient.generateQuestion(prompt);
             log.info("질문 생성 완료 | memberId={}", member.id());
 
-            InterviewQuestion question = interviewQuestionService.saveTodayQuestion(member.id(), result);
+            InterviewQuestion question = questionPersistenceService.saveTodayQuestion(member.id(), result);
             log.info("질문 저장 완료 | memberId={}", member.id());
 
             questionNotificationService.notifyMember(member, question);
         } catch (Exception e) {
             log.error("질문 처리 실패 | memberId={}", member.id(), e);
         }
-    }
-
-    private boolean shouldSendToday(MemberSchedulerInfo member, DayOfWeek today) {
-        return switch (member.frequency()) {
-            case EVERY -> true;
-            case WEEKLY -> today == DayOfWeek.MONDAY;
-        };
-    }
-
-
-    private boolean isValidNotification(MemberSchedulerInfo member) {
-        if (member.notification() == null) {
-            log.warn("멤버 스킵 | memberId={} | reason=no_notification", member.id());
-            return false;
-        }
-        return true;
     }
 
     private boolean isValidFrequency(MemberSchedulerInfo member) {
@@ -89,5 +73,20 @@ public class TodayQuestionService {
             return false;
         }
         return true;
+    }
+
+    private boolean isValidNotification(MemberSchedulerInfo member) {
+        if (member.notification() == null) {
+            log.warn("멤버 스킵 | memberId={} | reason=no_notification", member.id());
+            return false;
+        }
+        return true;
+    }
+
+    private boolean shouldSendToday(MemberSchedulerInfo member, DayOfWeek today) {
+        return switch (member.frequency()) {
+            case EVERY -> true;
+            case WEEKLY -> today == DayOfWeek.MONDAY;
+        };
     }
 }
