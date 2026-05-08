@@ -32,7 +32,7 @@ public class QuestionNotificationService {
 
     private void sendEmail(MemberSchedulerInfo member, InterviewQuestion question) {
         try {
-            emailService.sendInterviewQuestion(
+            emailService.send(
                     member.email(),
                     member.nickname(),
                     question.getQuestionTag(),
@@ -45,9 +45,13 @@ public class QuestionNotificationService {
     }
 
     private void sendKakao(MemberSchedulerInfo member, InterviewQuestion question) {
-        if (!isValidKakaoToken(member)) return;
+        if (member.kakaoAccessToken() == null || member.kakaoAccessToken().isBlank()) {
+            log.warn("멤버 스킵 | memberId={} | reason=no_kakao_token", member.id());
+            return;
+        }
+
         try {
-            kakaoService.sendInterviewQuestion(
+            kakaoService.send(
                     member.kakaoAccessToken(),
                     question.getQuestion(),
                     question.getQuestionTag()
@@ -59,13 +63,4 @@ public class QuestionNotificationService {
             log.error("카카오 발송 실패 | memberId={}", member.id(), e);
         }
     }
-
-    private boolean isValidKakaoToken(MemberSchedulerInfo member) {
-        if (member.kakaoAccessToken() == null || member.kakaoAccessToken().isBlank()) {
-            log.warn("멤버 스킵 | memberId={} | reason=no_kakao_token", member.id());
-            return false;
-        }
-        return true;
-    }
-
 }

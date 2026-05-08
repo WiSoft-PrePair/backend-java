@@ -1,15 +1,16 @@
 package io.wisoft.prepair.prepair_api.external.notification.kakao;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
@@ -17,7 +18,12 @@ public class KakaoService {
     private final RestClient restClient;
     private static final String URL = "https://kapi.kakao.com/v2/api/talk/memo/default/send";
 
-    public void sendInterviewQuestion(String kakaoAccessToken, String question, String questionTag) {
+    @Retryable(
+            value = {HttpServerErrorException.class, ResourceAccessException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    public void send(String kakaoAccessToken, String question, String questionTag) {
         String templateJson = """
                 {
                   "object_type": "text",
