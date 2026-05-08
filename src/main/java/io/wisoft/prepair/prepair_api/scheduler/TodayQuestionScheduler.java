@@ -7,7 +7,6 @@ import org.slf4j.MDC;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -19,13 +18,18 @@ public class TodayQuestionScheduler {
 
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Seoul")
     public void generateTodayQuestions() {
-        String correlationId = "SCHEDULER-" + UUID.randomUUID().toString();
+        String correlationId = "SCHEDULER-" + UUID.randomUUID();
         MDC.put("correlationId", correlationId);
+        long startTime = System.currentTimeMillis();
+
         try {
-            log.info("오늘의 질문 생성 스케줄러 시작 - {}", LocalDateTime.now());
+            log.info("오늘의 질문 생성 스케줄러 시작");
             todayQuestionService.sendTodayQuestions();
-            log.info("오늘의 질문 생성 스케줄러 종료");
-        } finally {
+            log.info("오늘의 질문 생성 스케줄러 종료 | elapsed={}ms", System.currentTimeMillis() - startTime);
+        } catch(Exception e) {
+            log.error("오늘의 질문 생성 스케줄러 실패 | elapsed={}ms", System.currentTimeMillis() - startTime, e);
+        }
+        finally {
             MDC.remove("correlationId");
         }
     }
