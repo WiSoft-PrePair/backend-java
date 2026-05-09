@@ -43,8 +43,13 @@ dependencies {
 	implementation 'software.amazon.awssdk:s3:2.26.12'
 	runtimeOnly 'org.postgresql:postgresql'
 
+	// 헬스 체크
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	// 재시도
+	implementation 'org.springframework.retry:spring-retry:2.0.10'
+
+	// 롬복
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 
