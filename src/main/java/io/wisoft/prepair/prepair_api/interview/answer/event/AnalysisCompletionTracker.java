@@ -1,5 +1,6 @@
 package io.wisoft.prepair.prepair_api.interview.answer.event;
 
+import io.wisoft.prepair.prepair_api.external.storage.LocalFileStorage;
 import java.nio.file.Path;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,41 +18,67 @@ import org.springframework.stereotype.Component;
 public class AnalysisCompletionTracker {
 
     private final ApplicationEventPublisher eventPublisher;
+    private final LocalFileStorage localFileStorage;
+
+    private static final int ANALYSIS_TASKS = 2;
     private static final int TOTAL_TASKS = 3;
 
-    private final ConcurrentMap<UUID, AtomicInteger> completionMap = new ConcurrentHashMap<>();
-    private final ConcurrentMap<UUID, AtomicBoolean> failureMap = new ConcurrentHashMap<>();
-    private final ConcurrentMap<UUID, Path> videoPathMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<UUID, TrackingState> stateMap = new ConcurrentHashMap<>();
 
     public void init(UUID answerId, Path videoPath) {
-        completionMap.put(answerId, new AtomicInteger(0));
-        failureMap.put(answerId, new AtomicBoolean(false));
-        videoPathMap.put(answerId, videoPath);
+        stateMap.put(answerId, new TrackingState(videoPath));
     }
 
-    public void complete(UUID answerId) {
-        finish(answerId, false);
+    public void completeAnalysis(UUID answerId) {
+        finishAnalysis(answerId, false);
     }
 
-    public void fail(UUID answerId) {
-        finish(answerId, true);
+    public void failAnalysis(UUID answerId) {
+        finishAnalysis(answerId, true);
     }
 
-    private void finish(UUID answerId, boolean failed) {
-        AtomicInteger counter = completionMap.get(answerId);
-        if (counter == null) return;
+    public void completeS3(UUID answerId) {
+        finishTask(answerId);
+    }
 
-        if (failed) {
-            failureMap.get(answerId).set(true);
+    public void failS3(UUID answerId) {
+        finishTask(answerId);
+    }
+
+    private void finishAnalysis(UUID answerId, boolean failed) {
+        TrackingState state = stateMap.get(answerId);
+        if (state == null) return;
+
+        if (failed) state.analysisFailed.set(true);
+
+        int analysisCount = state.analysisCount.incrementAndGet();
+        if (analysisCount == ANALYSIS_TASKS) {
+            eventPublisher.publishEvent(
+                    new AllAnalysisCompletedEvent(answerId, state.analysisFailed.get())
+            );
         }
+        finishTask(answerId);
+    }
 
-        int count = counter.incrementAndGet();
+    private void finishTask(UUID answerId) {
+        TrackingState state = stateMap.get(answerId);
+        if (state == null) return;
 
-        if (count == TOTAL_TASKS) {
-            boolean hasFailed = failureMap.remove(answerId).get();
-            completionMap.remove(answerId);
-            Path videoPath = videoPathMap.remove(answerId);
-            eventPublisher.publishEvent(new AllAnalysisCompletedEvent(answerId, hasFailed, videoPath));
+        int totalCount = state.totalCount.incrementAndGet();
+        if (totalCount == TOTAL_TASKS) {
+            stateMap.remove(answerId);
+            localFileStorage.delete(state.videoPath);
+        }
+    }
+
+    private static final class TrackingState {
+        final AtomicInteger analysisCount = new AtomicInteger(0);
+        final AtomicInteger totalCount = new AtomicInteger(0);
+        final AtomicBoolean analysisFailed = new AtomicBoolean(false);
+        final Path videoPath;
+
+        TrackingState(Path videoPath) {
+            this.videoPath = videoPath;
         }
     }
 }
