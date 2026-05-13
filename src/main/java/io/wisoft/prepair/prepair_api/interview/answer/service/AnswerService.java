@@ -7,11 +7,12 @@ import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.external.member.MemberServiceClient;
+import io.wisoft.prepair.prepair_api.external.storage.LocalFileStorage;
 import io.wisoft.prepair.prepair_api.common.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.common.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
 import io.wisoft.prepair.prepair_api.interview.answer.event.AnalysisCompletionTracker;
-import java.nio.file.Files;
+import io.wisoft.prepair.prepair_api.interview.answer.event.VideoAnswerProcessor;
 import java.nio.file.Path;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,12 @@ import org.springframework.web.multipart.MultipartFile;
 public class AnswerService {
 
     private final AnswerPersistenceService answerPersistenceService;
-    private final VideoAnswerProcessor videoAnswerAnalyzer;
+    private final VideoAnswerProcessor videoAnswerProcessor;
     private final FeedbackGenerator feedbackGenerator;
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
     private final AnalysisCompletionTracker completionTracker;
+    private final LocalFileStorage localFileStorage;
 
     public FeedbackResponse submitAnswer(final UUID questionId, final UUID memberId, final String answer) {
         // AI 피드백 생성
@@ -57,44 +59,20 @@ public class AnswerService {
         String email = memberServiceClient.getMember(memberId).email();
 
         // 임시 파일 먼저 생성 후 DB 저장 (실패 시 고아 레코드 방지)
-        Path videoPath = createTempFile(video);
+        Path videoPath = localFileStorage.save(video);
         InterviewAnswer answer = answerPersistenceService.saveVideoAnswer(questionId, memberId);
 
-        // 3개 비동기 작업 모두 완료 시 이벤트 발행을 위한 트래커 초기화
+        // 3개 비동기 작업 추적을 위한 트래커 초기화
         completionTracker.init(answer.getId(), videoPath);
         log.info("영상 답변 분석 시작 - questionId: {}, answerId: {}", questionId, answer.getId());
 
-        videoAnswerAnalyzer.uploadToS3(answer.getId(), videoPath, video.getContentType(), email);
-        videoAnswerAnalyzer.analyzeSTT(answer.getId(), questionId, memberId, videoPath);
-        videoAnswerAnalyzer.analyzeVideo(answer.getId(), videoPath);
+        videoAnswerProcessor.uploadToS3(answer.getId(), videoPath, video.getContentType(), email);
+        videoAnswerProcessor.analyzeSTT(answer.getId(), questionId, memberId, videoPath);
+        videoAnswerProcessor.analyzeVideo(answer.getId(), videoPath);
     }
 
     private InterviewQuestion getQuestion(UUID questionId, UUID memberId) {
         return questionRepository.findByIdAndMemberId(questionId, memberId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
-    }
-
-    private Path createTempFile(final MultipartFile video) {
-        try {
-            Path videoPath = Files.createTempFile("video-", getExtension(video.getOriginalFilename()));
-            video.transferTo(videoPath);
-            return videoPath;
-        } catch (Exception e) {
-            log.error("영상 임시 파일 생성 실패 - filename: {}", video.getOriginalFilename(), e);
-            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
-        }
-    }
-
-    private String getExtension(final String filename) {
-        if (filename == null || filename.isBlank()) {
-            return ".tmp";
-        }
-
-        int extensionIndex = filename.lastIndexOf('.');
-        if (extensionIndex < 0 || extensionIndex == filename.length() - 1) {
-            return ".tmp";
-        }
-
-        return filename.substring(extensionIndex);
     }
 }

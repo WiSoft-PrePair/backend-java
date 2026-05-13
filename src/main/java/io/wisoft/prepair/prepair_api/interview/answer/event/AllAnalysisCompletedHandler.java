@@ -21,9 +21,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +45,6 @@ public class AllAnalysisCompletedHandler {
     @EventListener
     public void handle(AllAnalysisCompletedEvent event) {
         UUID answerId = event.answerId();
-        deleteTempFile(event.videoPath());
 
         if (event.hasFailed()) {
             log.error("[종합평가] 분석 실패로 종합평가 생략 - answerId: {}", answerId);
@@ -223,15 +219,6 @@ public class AllAnalysisCompletedHandler {
 
         sseEmitterManager.send(session.getId(), "analysis-failed", Map.of("message", message));
         sseEmitterManager.complete(session.getId());
-    }
-
-    private void deleteTempFile(Path videoPath) {
-        if (videoPath == null) return;
-        try {
-            Files.deleteIfExists(videoPath);
-        } catch (IOException e) {
-            log.warn("[임시파일] 삭제 실패 - path: {}", videoPath, e);
-        }
     }
 
     private record AnalysisFeedbacks(

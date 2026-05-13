@@ -1,24 +1,27 @@
-package io.wisoft.prepair.prepair_api.interview.answer.service;
+package io.wisoft.prepair.prepair_api.interview.answer.event;
 
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackDetail;
-import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
-import io.wisoft.prepair.prepair_api.interview.answer.entity.FeedbackType;
 import io.wisoft.prepair.prepair_api.common.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.common.exception.ErrorCode;
+import io.wisoft.prepair.prepair_api.external.storage.S3FileStorage;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackDetail;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.entity.FeedbackType;
+import io.wisoft.prepair.prepair_api.interview.answer.service.AnswerPersistenceService;
+import io.wisoft.prepair.prepair_api.interview.answer.service.FeedbackGenerator;
+import io.wisoft.prepair.prepair_api.interview.answer.service.SpeechToTextService;
+import io.wisoft.prepair.prepair_api.interview.answer.service.VideoFrameAnalysisService;
+import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
-import io.wisoft.prepair.prepair_api.interview.answer.event.AnalysisCompletionTracker;
-import io.wisoft.prepair.prepair_api.external.storage.FileUploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class VideoAnswerProcessor {
 
@@ -26,20 +29,20 @@ public class VideoAnswerProcessor {
     private final SpeechToTextService speechToTextService;
     private final VideoFrameAnalysisService videoAnalysisService;
     private final QuestionRepository questionRepository;
-    private final FileUploader fileUploader;
+    private final S3FileStorage s3FileStorage;
     private final FeedbackGenerator feedbackGenerator;
     private final AnalysisCompletionTracker completionTracker;
 
     @Async("videoTaskExecutor")
     public void uploadToS3(final UUID answerId, final Path videoPath, final String contentType, final String email) {
         try {
-            String mediaUrl = fileUploader.upload(videoPath, contentType, email);
+            String mediaUrl = s3FileStorage.save(videoPath, contentType, email);
             answerPersistenceService.updateMediaUrl(answerId, mediaUrl);
             log.info("[VIDEO-S3] 업로드 완료 - answerId: {}", answerId);
-            completionTracker.complete(answerId);
+            completionTracker.completeS3(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-S3] 업로드 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
-            completionTracker.fail(answerId);
+            completionTracker.failS3(answerId);
         }
     }
 
@@ -58,10 +61,10 @@ public class VideoAnswerProcessor {
             answerPersistenceService.saveVideoFeedback(answerId, result, detail, FeedbackType.STT);
 
             log.info("[VIDEO-STT] 분석 완료 - answerId: {}", answerId);
-            completionTracker.complete(answerId);
+            completionTracker.completeAnalysis(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-STT] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
-            completionTracker.fail(answerId);
+            completionTracker.failAnalysis(answerId);
         }
     }
 
@@ -74,10 +77,10 @@ public class VideoAnswerProcessor {
             answerPersistenceService.saveVideoFeedback(answerId, result, detail, FeedbackType.VIDEO);
 
             log.info("[VIDEO-ANALYSIS] 분석 완료 - answerId: {}", answerId);
-            completionTracker.complete(answerId);
+            completionTracker.completeAnalysis(answerId);
         } catch (Exception e) {
             log.error("[VIDEO-ANALYSIS] 분석 실패 - answerId: {}, error: {}", answerId, e.getMessage(), e);
-            completionTracker.fail(answerId);
+            completionTracker.failAnalysis(answerId);
         }
     }
 }
