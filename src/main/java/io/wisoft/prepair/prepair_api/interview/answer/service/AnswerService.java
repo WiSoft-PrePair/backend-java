@@ -1,9 +1,9 @@
 package io.wisoft.prepair.prepair_api.interview.answer.service;
 
-import io.wisoft.prepair.prepair_api.interview.answer.dto.AnswerSubmitResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackDetail;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResponse;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.AnswerSubmitResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackDetail;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.external.member.MemberServiceClient;

@@ -1,5 +1,6 @@
-package io.wisoft.prepair.prepair_api.interview.answer.dto;
+package io.wisoft.prepair.prepair_api.interview.answer.dto.response;
 
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewFeedback;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.FeedbackType;
 

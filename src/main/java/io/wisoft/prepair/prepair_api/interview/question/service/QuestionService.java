@@ -15,7 +15,7 @@ import io.wisoft.prepair.prepair_api.common.exception.ErrorCode;
 import io.wisoft.prepair.prepair_api.external.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.external.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.external.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.interview.prompt.PromptBuilder;
+import io.wisoft.prepair.prepair_api.interview.prompt.QuestionPromptBuilder;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
 
 import io.wisoft.prepair.prepair_api.interview.jobposting.service.JobPostingService;
@@ -39,7 +39,7 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
-    private final PromptBuilder promptBuilder;
+    private final QuestionPromptBuilder promptBuilder;
 
     public List<QuestionResponse> getQuestions(UUID memberId, QuestionType type) {
         return questionRepository.findByMemberIdAndQuestionTypeOrderByCreatedAtDesc(memberId, type)
