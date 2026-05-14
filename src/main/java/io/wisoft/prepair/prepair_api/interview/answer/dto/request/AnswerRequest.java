@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.interview.answer.dto;
+package io.wisoft.prepair.prepair_api.interview.answer.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 

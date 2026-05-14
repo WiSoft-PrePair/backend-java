@@ -1,4 +1,4 @@
-package io.wisoft.prepair.prepair_api.interview.answer.dto;
+package io.wisoft.prepair.prepair_api.interview.answer.dto.response;
 
 import java.util.List;
 import java.util.UUID;
