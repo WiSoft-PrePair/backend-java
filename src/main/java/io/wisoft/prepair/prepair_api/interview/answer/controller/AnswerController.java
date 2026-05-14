@@ -1,7 +1,7 @@
 package io.wisoft.prepair.prepair_api.interview.answer.controller;
 
-import io.wisoft.prepair.prepair_api.interview.answer.dto.AnswerRequest;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResponse;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.request.AnswerRequest;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.response.FeedbackResponse;
 import io.wisoft.prepair.prepair_api.common.response.ApiResponse;
 import io.wisoft.prepair.prepair_api.interview.answer.service.AnswerService;
 import io.wisoft.prepair.prepair_api.interview.answer.service.VideoAnswerSseService;

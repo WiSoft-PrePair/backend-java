@@ -2,7 +2,7 @@ package io.wisoft.prepair.prepair_api.interview.answer.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackResult;
 import io.wisoft.prepair.prepair_api.external.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.common.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.common.exception.ErrorCode;

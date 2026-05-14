@@ -2,24 +2,27 @@ package io.wisoft.prepair.prepair_api.interview.answer.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.CombinedFeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FinalFeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.CombinedFeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FinalFeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FinalFeedbackInput;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.external.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.common.exception.BusinessException;
 import io.wisoft.prepair.prepair_api.common.exception.ErrorCode;
-import io.wisoft.prepair.prepair_api.interview.prompt.PromptBuilder;
+import io.wisoft.prepair.prepair_api.interview.prompt.FeedbackPromptBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class FeedbackGenerator {
 
-    private final PromptBuilder promptBuilder;
+    private final FeedbackPromptBuilder promptBuilder;
     private final ObjectMapper objectMapper;
     private final OpenAiClient openAiClient;
 
@@ -51,8 +54,8 @@ public class FeedbackGenerator {
         }
     }
 
-    public FinalFeedbackResult generateFinal(final String questionsAndFeedbacks) {
-        String prompt = promptBuilder.buildFinalFeedbackPrompt(questionsAndFeedbacks);
+    public FinalFeedbackResult generateFinal(final List<FinalFeedbackInput> inputs) {
+        String prompt = promptBuilder.buildFinalFeedbackPrompt(inputs);
         String raw = openAiClient.generateText(prompt);
 
         try {

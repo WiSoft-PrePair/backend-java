@@ -2,10 +2,10 @@ package io.wisoft.prepair.prepair_api.interview.answer.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.AnswerSubmitResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.CombinedFeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackResult;
-import io.wisoft.prepair.prepair_api.interview.answer.dto.FeedbackDetail;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.AnswerSubmitResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.CombinedFeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackResult;
+import io.wisoft.prepair.prepair_api.interview.answer.dto.internal.FeedbackDetail;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewFeedback;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;

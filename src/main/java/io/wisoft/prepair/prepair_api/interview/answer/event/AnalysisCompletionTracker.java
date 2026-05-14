@@ -54,7 +54,7 @@ public class AnalysisCompletionTracker {
         int analysisCount = state.analysisCount.incrementAndGet();
         if (analysisCount == ANALYSIS_TASKS) {
             eventPublisher.publishEvent(
-                    new AllAnalysisCompletedEvent(answerId, state.analysisFailed.get())
+                    new AnalysisCompletedEvent(answerId, state.analysisFailed.get())
             );
         }
         finishTask(answerId);

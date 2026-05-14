@@ -12,13 +12,13 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AllAnalysisCompletedHandler {
+public class AnalysisCompletedHandler {
 
     private final AnalysisCompletionService analysisCompletionService;
 
     @Async("videoTaskExecutor")
     @EventListener
-    public void handle(AllAnalysisCompletedEvent event) {
+    public void handle(AnalysisCompletedEvent event) {
         UUID answerId = event.answerId();
 
         if (event.hasFailed()) {
