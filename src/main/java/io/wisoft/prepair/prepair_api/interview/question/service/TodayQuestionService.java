@@ -4,7 +4,7 @@ import io.wisoft.prepair.prepair_api.external.member.MemberServiceClient;
 import io.wisoft.prepair.prepair_api.external.member.dto.MemberSchedulerInfo;
 import io.wisoft.prepair.prepair_api.external.openai.OpenAiClient;
 import io.wisoft.prepair.prepair_api.external.openai.dto.QuestionWithTags;
-import io.wisoft.prepair.prepair_api.interview.prompt.PromptBuilder;
+import io.wisoft.prepair.prepair_api.interview.prompt.QuestionPromptBuilder;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class TodayQuestionService {
     private final QuestionRepository questionRepository;
     private final MemberServiceClient memberServiceClient;
     private final OpenAiClient openAiClient;
-    private final PromptBuilder promptBuilder;
+    private final QuestionPromptBuilder promptBuilder;
 
     public void sendTodayQuestions() {
         List<MemberSchedulerInfo> members = memberServiceClient.getMembers();
