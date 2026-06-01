@@ -70,7 +70,7 @@ public class SessionService {
             if (answer == null) {
                 result.add(new SessionDetailResponse.QuestionFeedback(
                         question.getId(), question.getQuestion(),
-                        null, null, null, null
+                        null, null, null, null, null
                 ));
                 continue;
             }
@@ -81,6 +81,7 @@ public class SessionService {
             result.add(new SessionDetailResponse.QuestionFeedback(
                     question.getId(),
                     question.getQuestion(),
+                    answer.getMediaUrl(),
                     combined == null ? null : combined.getScore(),
                     combined == null ? null : combined.getFeedback(),
                     getFeedbackText(answerFeedbacks, FeedbackType.STT),

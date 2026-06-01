@@ -15,6 +15,7 @@ public record SessionDetailResponse(
     public record QuestionFeedback(
             UUID questionId,
             String question,
+            String mediaUrl,
             Integer combinedScore,
             String combinedFeedback,
             String sttFeedback,
