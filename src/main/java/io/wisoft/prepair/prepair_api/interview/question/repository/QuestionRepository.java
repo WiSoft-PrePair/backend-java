@@ -20,7 +20,9 @@ public interface QuestionRepository extends JpaRepository<InterviewQuestion, UUI
 
     Optional<InterviewQuestion> findByIdAndMemberId(UUID id, UUID memberId);
 
-    List<InterviewQuestion> findByInterviewSessionId(UUID sessionId);
+    Optional<InterviewQuestion> findByIdAndMemberIdAndInterviewSessionId(UUID id, UUID memberId, UUID sessionId);
+
+    List<InterviewQuestion> findByInterviewSessionIdOrderByCreatedAtAsc(UUID sessionId);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE InterviewQuestion q SET q.latestScore = :score " +

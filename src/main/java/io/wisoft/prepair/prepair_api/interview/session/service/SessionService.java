@@ -9,6 +9,7 @@ import io.wisoft.prepair.prepair_api.interview.answer.repository.AnswerRepositor
 import io.wisoft.prepair.prepair_api.interview.answer.repository.FeedbackRepository;
 import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
 import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
+import io.wisoft.prepair.prepair_api.interview.session.dto.response.CreateSessionResponse;
 import io.wisoft.prepair.prepair_api.interview.session.dto.response.SessionDetailResponse;
 import io.wisoft.prepair.prepair_api.interview.session.dto.response.SessionResponse;
 import io.wisoft.prepair.prepair_api.interview.session.entity.InterviewSession;
@@ -60,7 +61,7 @@ public class SessionService {
     }
 
     public List<SessionDetailResponse.QuestionFeedback> buildQuestionFeedbacks(UUID sessionId) {
-        List<InterviewQuestion> questions = questionRepository.findByInterviewSessionId(sessionId);
+        List<InterviewQuestion> questions = questionRepository.findByInterviewSessionIdOrderByCreatedAtAsc(sessionId);
         Map<UUID, InterviewAnswer> answerMap = getAnswerMap(sessionId);
         Map<UUID, List<InterviewFeedback>> feedbackMap = getFeedbackMap(sessionId);
 
@@ -76,7 +77,7 @@ public class SessionService {
             }
 
             List<InterviewFeedback> answerFeedbacks = feedbackMap.getOrDefault(answer.getId(), List.of());
-            InterviewFeedback combined = findOptionalFeedback(answerFeedbacks, FeedbackType.COMBINED);
+            InterviewFeedback combined = findFeedback(answerFeedbacks, FeedbackType.COMBINED);
 
             result.add(new SessionDetailResponse.QuestionFeedback(
                     question.getId(),
@@ -92,9 +93,67 @@ public class SessionService {
     }
 
     @Transactional
+    public CreateSessionResponse createSession(UUID oldSessionId, UUID memberId) {
+        InterviewSession oldSession = sessionRepository.findById(oldSessionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SESSION_NOT_FOUND));
+
+        if (!oldSession.getMemberId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        if (oldSession.getStatus() == SessionStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.SESSION_NOT_FINISHED);
+        }
+
+        List<InterviewQuestion> oldQuestions = questionRepository.findByInterviewSessionIdOrderByCreatedAtAsc(oldSessionId);
+        InterviewSession newSession = sessionRepository.save(new InterviewSession(memberId, oldQuestions.size()));
+
+        List<UUID> newQuestionIds = oldQuestions.stream()
+                .map(q -> cloneQuestion(q, newSession).getId())
+                .toList();
+
+        return new CreateSessionResponse(newSession.getId(), newQuestionIds);
+    }
+
+    @Transactional
+    public CreateSessionResponse createQuestion(UUID oldSessionId, UUID oldQuestionId, UUID memberId) {
+        InterviewSession oldSession = sessionRepository.findById(oldSessionId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.SESSION_NOT_FOUND));
+
+        if (!oldSession.getMemberId().equals(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
+        if (oldSession.getStatus() == SessionStatus.IN_PROGRESS) {
+            throw new BusinessException(ErrorCode.SESSION_NOT_FINISHED);
+        }
+
+        InterviewQuestion oldQuestion = questionRepository.findByIdAndMemberIdAndInterviewSessionId(
+                        oldQuestionId,
+                        memberId,
+                        oldSessionId
+                )
+                .orElseThrow(() -> new BusinessException(ErrorCode.QUESTION_NOT_FOUND));
+
+        InterviewSession newSession = sessionRepository.save(new InterviewSession(memberId, 1));
+        InterviewQuestion newQuestion = cloneQuestion(oldQuestion, newSession);
+
+        return new CreateSessionResponse(newSession.getId(), List.of(newQuestion.getId()));
+    }
+
+    private InterviewQuestion cloneQuestion(InterviewQuestion source, InterviewSession newSession) {
+        return questionRepository.save(new InterviewQuestion(
+                source.getMemberId(),
+                source.getQuestion(),
+                source.getQuestionType(),
+                source.getQuestionTag(),
+                source.getJobPosting(),
+                newSession
+        ));
+    }
+
+    @Transactional
     public void saveCompletedSession(UUID sessionId, int finalScore, String finalFeedback) {
         InterviewSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SESSION_NOT_FOUND));
 
         if (session.getStatus() == SessionStatus.COMPLETED) {
             return;
@@ -106,7 +165,7 @@ public class SessionService {
     @Transactional
     public void saveFailedSession(UUID sessionId) {
         InterviewSession session = sessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 세션입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.SESSION_NOT_FOUND));
 
         if (session.getStatus() != SessionStatus.IN_PROGRESS) {
             return;
@@ -130,7 +189,7 @@ public class SessionService {
                 .collect(Collectors.groupingBy(f -> f.getInterviewAnswer().getId()));
     }
 
-    private InterviewFeedback findOptionalFeedback(List<InterviewFeedback> feedbacks, FeedbackType type) {
+    private InterviewFeedback findFeedback(List<InterviewFeedback> feedbacks, FeedbackType type) {
         return feedbacks.stream()
                 .filter(f -> f.getFeedbackType() == type)
                 .findFirst()
@@ -138,7 +197,7 @@ public class SessionService {
     }
 
     private String getFeedbackText(List<InterviewFeedback> feedbacks, FeedbackType type) {
-        InterviewFeedback feedback = findOptionalFeedback(feedbacks, type);
+        InterviewFeedback feedback = findFeedback(feedbacks, type);
         return feedback == null ? null : feedback.getFeedback();
     }
 }

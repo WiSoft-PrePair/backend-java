@@ -25,6 +25,7 @@ public enum ErrorCode {
 
     // Session
     SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "세션을 찾을 수 없습니다."),
+    SESSION_NOT_FINISHED(HttpStatus.BAD_REQUEST, "아직 진행 중인 세션입니다."),
 
     // Question
     QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "질문을 찾을 수 없습니다."),
