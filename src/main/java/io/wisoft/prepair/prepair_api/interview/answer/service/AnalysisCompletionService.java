@@ -11,20 +11,17 @@ import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewAnswer;
 import io.wisoft.prepair.prepair_api.interview.answer.entity.InterviewFeedback;
 import io.wisoft.prepair.prepair_api.interview.answer.repository.AnswerRepository;
 import io.wisoft.prepair.prepair_api.interview.answer.repository.FeedbackRepository;
-import io.wisoft.prepair.prepair_api.interview.question.entity.InterviewQuestion;
-import io.wisoft.prepair.prepair_api.interview.question.repository.QuestionRepository;
+import io.wisoft.prepair.prepair_api.interview.session.dto.response.SessionDetailResponse;
 import io.wisoft.prepair.prepair_api.interview.session.entity.InterviewSession;
 import io.wisoft.prepair.prepair_api.interview.session.notifier.SessionCompletionNotifier;
-import io.wisoft.prepair.prepair_api.interview.session.service.SessionPersistenceService;
+import io.wisoft.prepair.prepair_api.interview.session.service.SessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,10 +30,9 @@ public class AnalysisCompletionService {
 
     private final AnswerRepository answerRepository;
     private final FeedbackRepository feedbackRepository;
-    private final QuestionRepository questionRepository;
     private final FeedbackGenerator feedbackGenerator;
     private final AnswerPersistenceService answerPersistenceService;
-    private final SessionPersistenceService sessionPersistenceService;
+    private final SessionService sessionService;
     private final SessionCompletionNotifier completionNotifier;
 
     public void processAnalysisCompletion(UUID answerId) {
@@ -91,7 +87,7 @@ public class AnalysisCompletionService {
             return;
         }
 
-        sessionPersistenceService.saveFailedSession(session.getId());
+        sessionService.saveFailedSession(session.getId());
         completionNotifier.notifyFailure(session.getId(), message);
     }
 
@@ -127,7 +123,7 @@ public class AnalysisCompletionService {
             FinalFeedbackData data,
             FinalFeedbackResult finalResult
     ) {
-        sessionPersistenceService.saveCompletedSession(sessionId, data.finalScore(), finalResult.finalFeedback());
+        sessionService.saveCompletedSession(sessionId, data.finalScore(), finalResult.finalFeedback());
 
         FinalFeedbackResponse response = new FinalFeedbackResponse(
                 sessionId,
@@ -142,58 +138,27 @@ public class AnalysisCompletionService {
     }
 
     private FinalFeedbackData buildFinalData(UUID sessionId) {
-        List<InterviewQuestion> questions = questionRepository.findByInterviewSessionId(sessionId);
-        Map<UUID, InterviewAnswer> answerMap = getAnswerMap(sessionId);
-        Map<UUID, List<InterviewFeedback>> feedbackMap = getFeedbackMap(sessionId);
+        List<SessionDetailResponse.QuestionFeedback> aggregated = sessionService.buildQuestionFeedbacks(sessionId);
 
         List<FinalFeedbackResponse.QuestionFeedback> questionFeedbacks = new ArrayList<>();
         int totalScore = 0;
 
-        for (InterviewQuestion question : questions) {
-            InterviewAnswer answer = answerMap.get(question.getId());
-            if (answer == null) continue;
-
-            List<InterviewFeedback> answerFeedbacks = feedbackMap.getOrDefault(answer.getId(), List.of());
-            InterviewFeedback combined = findOptionalFeedback(answerFeedbacks, FeedbackType.COMBINED);
-
-            if (combined == null) continue;
+        for (SessionDetailResponse.QuestionFeedback qf : aggregated) {
+            if (qf.combinedScore() == null) continue;
 
             questionFeedbacks.add(new FinalFeedbackResponse.QuestionFeedback(
-                    question.getId(),
-                    question.getQuestion(),
-                    combined.getScore(),
-                    combined.getFeedback(),
-                    getFeedbackText(answerFeedbacks, FeedbackType.STT),
-                    getFeedbackText(answerFeedbacks, FeedbackType.VIDEO)
+                    qf.questionId(),
+                    qf.question(),
+                    qf.combinedScore(),
+                    qf.combinedFeedback(),
+                    qf.sttFeedback(),
+                    qf.videoFeedback()
             ));
-
-            totalScore += combined.getScore();
+            totalScore += qf.combinedScore();
         }
 
         int finalScore = calculateAverageScore(totalScore, questionFeedbacks.size());
         return new FinalFeedbackData(questionFeedbacks, finalScore);
-    }
-
-    private Map<UUID, InterviewAnswer> getAnswerMap(UUID sessionId) {
-        return answerRepository.findBySessionId(sessionId).stream()
-                .collect(Collectors.toMap(a -> a.getInterviewQuestion().getId(), a -> a));
-    }
-
-    private Map<UUID, List<InterviewFeedback>> getFeedbackMap(UUID sessionId) {
-        return feedbackRepository.findAllBySessionId(sessionId).stream()
-                .collect(Collectors.groupingBy(f -> f.getInterviewAnswer().getId()));
-    }
-
-    private InterviewFeedback findOptionalFeedback(List<InterviewFeedback> feedbacks, FeedbackType type) {
-        return feedbacks.stream()
-                .filter(f -> f.getFeedbackType() == type)
-                .findFirst()
-                .orElse(null);
-    }
-
-    private String getFeedbackText(List<InterviewFeedback> feedbacks, FeedbackType type) {
-        InterviewFeedback feedback = findOptionalFeedback(feedbacks, type);
-        return feedback == null ? null : feedback.getFeedback();
     }
 
     private int calculateAverageScore(int totalScore, int count) {
